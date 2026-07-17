@@ -14,18 +14,13 @@
           <img src="../images/logo.png" alt="Lake Erie Arms">
           <span>Event Punch Card</span>
         </a>
-        <div class="topbar-actions">
-          <a class="sheet-link" href="staff.html">Staff scanners</a>
-          <a class="sheet-link" id="sheetLink" target="_blank" rel="noreferrer">Open tracker</a>
-        </div>
       </header>
 
       <section class="hero">
         <div class="intro">
           <p class="eyebrow">Start here</p>
           <h1>Lake Erie Arms event pass</h1>
-          <p>Sign up once, screenshot your QR pass, and show it at each station to collect punches for prizes and raffle entries.</p>
-          <a class="btn secondary staff-home-cta" href="staff.html">Open staff scanner home</a>
+          <p>Sign up once, <strong style="color: var(--red); font-weight: 900;">screenshot your QR pass</strong>, and show it at each station to collect punches for prizes and raffle entries.</p>
         </div>
 
         <section class="panel" aria-labelledby="signupTitle">
@@ -70,8 +65,11 @@
             <div class="field">
               <label for="memberStatus">Member status</label>
               <select id="memberStatus" name="memberStatus">
-                <option value="guest">Guest</option>
-                <option value="member">Current member</option>
+                <option value="non-member">Non member</option>
+                <option value="brass">Brass</option>
+                <option value="gold">Gold</option>
+                <option value="platinum">Platinum</option>
+                <option value="charter">Charter</option>
               </select>
             </div>
 

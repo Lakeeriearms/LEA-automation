@@ -645,3 +645,10 @@ textarea:focus {
     max-width: 420px;
   }
 }
+
+select { color: #f8f9fb; }
+
+select option {
+  color: #111318;
+  background: #ffffff;
+}
