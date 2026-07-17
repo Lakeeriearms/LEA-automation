@@ -28,6 +28,7 @@ const EVENT_HEADERS = [
   "Total Punches",
   "Raffle Entries",
   "Last Updated",
+  "Membership Status",
 ];
 
 const EVENT_PUNCH_COLUMNS = {
@@ -168,7 +169,7 @@ function signup_(payload) {
 
   const guestId = createUniqueGuestId_();
   const now = new Date();
-  const memberStatus = payload.memberStatus === "member" ? "Member" : "Guest";
+  const memberStatus = normalizeMembershipStatus_(payload.memberStatus);
 
   appendEventSignup_({
     guestId,
@@ -306,7 +307,7 @@ function findEventGuest_(guestId) {
     phone: values[4],
     city: values[5],
     state: values[6],
-    memberStatus: values[7] === true ? "Member" : "Guest",
+    memberStatus: values[18] || (values[7] === true ? "Member" : "Non member"),
   };
 }
 
@@ -329,6 +330,12 @@ function ensureEventSheet_() {
     headerRange.setValues([EVENT_HEADERS]);
     headerRange.setFontWeight("bold");
     sheet.setFrozenRows(HEADER_ROW);
+  }
+
+  const membershipStatusHeader = sheet.getRange(HEADER_ROW, 19);
+  if (!membershipStatusHeader.getValue()) {
+    membershipStatusHeader.setValue("Membership Status");
+    membershipStatusHeader.setFontWeight("bold");
   }
 
   const checkboxRange = sheet.getRange(DATA_START_ROW, 8, Math.max(1, sheet.getMaxRows() - DATA_START_ROW + 1), 8);
@@ -359,6 +366,7 @@ function appendEventSignup_(guest) {
     "=COUNTIF(H" + formulaRow + ":O" + formulaRow + ",TRUE)",
     "=P" + formulaRow,
     guest.updatedAt,
+    guest.memberStatus,
   ]]);
 }
 
@@ -488,6 +496,20 @@ function parsePayload_(event) {
   } catch (error) {
     return normalizeParams_(event.parameter || {});
   }
+}
+
+function normalizeMembershipStatus_(value) {
+  const status = clean_(value).toLowerCase();
+  const allowed = {
+    "non-member": "Non member",
+    "non member": "Non member",
+    brass: "Brass",
+    gold: "Gold",
+    platinum: "Platinum",
+    charter: "Charter",
+  };
+
+  return allowed[status] || "Non member";
 }
 
 function clean_(value) {
