@@ -1,0 +1,505 @@
+const SPREADSHEET_ID = "1XAj47kCYJ7MMK4WcsLmGhCyLbRzbMDgfMYw7RKPO_yw";
+const EVENT_NAME = "Lake Erie Arms Event Punch Card";
+const HEADER_ROW = 4;
+const DATA_START_ROW = 5;
+
+const SHEETS = {
+  activeEvent: "Event - Main",
+};
+
+const EVENT_CODE_CAPACITY = 100000;
+
+const EVENT_HEADERS = [
+  "Code",
+  "First Name",
+  "Last Name",
+  "Email",
+  "Phone",
+  "City",
+  "State",
+  "Member / Membership",
+  "LEA Range",
+  "LUL Immersion Zone",
+  "LUL Action Zone",
+  "Retail Purchase",
+  "LEA Cafe Purchase",
+  "Caliber Club Purchase",
+  "Photobooth Post",
+  "Total Punches",
+  "Raffle Entries",
+  "Last Updated",
+];
+
+const EVENT_PUNCH_COLUMNS = {
+  member: 8,
+  range: 9,
+  "level-up-live-immersion-zone": 10,
+  "level-up-live-action-zone": 11,
+  retail: 12,
+  "lea-cafe": 13,
+  "caliber-club": 14,
+  photobooth: 15,
+};
+
+const STATIONS = {
+  member: {
+    id: "member",
+    name: "Member / Membership",
+    checklistItem: "Is member or purchase membership",
+    baseEntries: 1,
+    purchaseBonusEntries: 0,
+    allowsPurchase: true,
+  },
+  range: {
+    id: "range",
+    name: "LEA Range",
+    checklistItem: "Free Shooting on LEA Range",
+    baseEntries: 1,
+    purchaseBonusEntries: 0,
+    allowsPurchase: false,
+  },
+  "level-up-live-immersion-zone": {
+    id: "level-up-live-immersion-zone",
+    name: "Level Up Live Immersion Zone",
+    checklistItem: "1 Free Mag in LUL",
+    baseEntries: 1,
+    purchaseBonusEntries: 0,
+    allowsPurchase: false,
+  },
+  "level-up-live-action-zone": {
+    id: "level-up-live-action-zone",
+    name: "Level Up Live Action Zone",
+    checklistItem: "1 Free Run in Action Zone",
+    baseEntries: 1,
+    purchaseBonusEntries: 0,
+    allowsPurchase: false,
+  },
+  retail: {
+    id: "retail",
+    name: "Retail",
+    checklistItem: "Make Purchase at Retail",
+    baseEntries: 1,
+    purchaseBonusEntries: 1,
+    allowsPurchase: true,
+  },
+  "lea-cafe": {
+    id: "lea-cafe",
+    name: "LEA Cafe",
+    checklistItem: "Make Purchase at LEA Cafe",
+    baseEntries: 1,
+    purchaseBonusEntries: 1,
+    allowsPurchase: true,
+  },
+  "caliber-club": {
+    id: "caliber-club",
+    name: "Caliber Club",
+    checklistItem: "Make Purchase at Caliber Club",
+    baseEntries: 1,
+    purchaseBonusEntries: 1,
+    allowsPurchase: true,
+  },
+  photobooth: {
+    id: "photobooth",
+    name: "Photobooth",
+    checklistItem: "Take photo in booth & post/tag us",
+    baseEntries: 1,
+    purchaseBonusEntries: 0,
+    allowsPurchase: false,
+  },
+};
+
+function doGet(event) {
+  const payload = normalizeParams_(event && event.parameter ? event.parameter : {});
+  const result = route_(payload);
+
+  if (payload.callback) {
+    const callbackName = String(payload.callback).replace(/[^\w.$]/g, "");
+    return ContentService
+      .createTextOutput(callbackName + "(" + JSON.stringify(result) + ");")
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+
+  return json_(result);
+}
+
+function doPost(event) {
+  const payload = parsePayload_(event);
+  return json_(route_(payload));
+}
+
+function route_(payload) {
+  try {
+    setupWorkbook_();
+
+    switch (payload.action) {
+      case "signup":
+        return signup_(payload);
+      case "scan":
+        return scan_(payload);
+      case "lookup":
+        return lookup_(payload);
+      case "stations":
+        return { ok: true, eventName: EVENT_NAME, stations: stationList_() };
+      default:
+        return {
+          ok: true,
+          eventName: EVENT_NAME,
+          message: "Lake Erie Arms event punch card endpoint is running.",
+          actions: ["signup", "scan", "lookup", "stations"],
+          stations: stationList_(),
+        };
+    }
+  } catch (error) {
+    return { ok: false, error: String(error && error.message ? error.message : error) };
+  }
+}
+
+function signup_(payload) {
+  const firstName = clean_(payload.firstName);
+  const lastName = clean_(payload.lastName);
+  const phone = clean_(payload.phone);
+  const email = clean_(payload.email);
+  const city = clean_(payload.city);
+  const state = clean_(payload.state).toUpperCase();
+
+  if (!firstName || !lastName || (!phone && !email)) {
+    throw new Error("First name, last name, and phone or email are required.");
+  }
+
+  const guestId = createUniqueGuestId_();
+  const now = new Date();
+  const memberStatus = payload.memberStatus === "member" ? "Member" : "Guest";
+
+  appendEventSignup_({
+    guestId,
+    firstName,
+    lastName,
+    email,
+    phone,
+    city,
+    state,
+    memberStatus,
+    updatedAt: now,
+  });
+
+  return {
+    ok: true,
+    guest: {
+      guestId,
+      firstName,
+      lastName,
+      phone,
+      email,
+      city,
+      state,
+      memberStatus,
+      createdAt: now.toISOString(),
+    },
+    stations: stationList_(),
+  };
+}
+
+function scan_(payload) {
+  const guestId = clean_(payload.guestId).toUpperCase();
+  const stationId = clean_(payload.stationId);
+  const station = STATIONS[stationId];
+
+  if (!guestId) {
+    throw new Error("Missing guest ID.");
+  }
+
+  if (!station) {
+    throw new Error("Unknown station: " + stationId);
+  }
+
+  const guest = findEventGuest_(guestId);
+  if (!guest) {
+    throw new Error("Guest not found: " + guestId);
+  }
+
+  const existingPunch = findEventPunch_(guestId, stationId);
+  if (existingPunch) {
+    return {
+      ok: true,
+      duplicate: true,
+      message: "Already punched for " + station.name + ".",
+      guest,
+      station,
+      existingPunch,
+    };
+  }
+
+  const purchaseAmount = Math.max(0, Number(payload.purchaseAmount || 0));
+  const now = new Date();
+  const scanId = "SCAN-" + Utilities.getUuid().slice(0, 8).toUpperCase();
+
+  const updatedPunches = markEventPunch_(guestId, station.id, now);
+
+  return {
+    ok: true,
+    duplicate: false,
+    message: "Punch added for " + station.name + ".",
+    guest,
+    station,
+    punch: {
+      timestamp: now.toISOString(),
+      purchaseAmount,
+      entries: updatedPunches,
+      scanId,
+    },
+  };
+}
+
+function lookup_(payload) {
+  const guestId = clean_(payload.guestId).toUpperCase();
+  const guest = findEventGuest_(guestId);
+
+  if (!guest) {
+    throw new Error("Guest not found: " + guestId);
+  }
+
+  return {
+    ok: true,
+    guest,
+    punches: getEventPunches_(guestId),
+    stations: stationList_(),
+  };
+}
+
+function setupWorkbook_() {
+  ensureEventSheet_();
+}
+
+function createGuestId_() {
+  const date = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "yyMMdd");
+  const suffix = Utilities.getUuid().replace(/-/g, "").slice(0, 10).toUpperCase();
+  return "LEA-" + date + "-" + suffix;
+}
+
+function createUniqueGuestId_() {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const guestId = createGuestId_();
+
+    if (!findEventRow_(getSheet_(SHEETS.activeEvent), guestId)) {
+      return guestId;
+    }
+  }
+
+  throw new Error("Unable to create a unique guest code. Try again.");
+}
+
+function findEventGuest_(guestId) {
+  const sheet = getSheet_(SHEETS.activeEvent);
+  const row = findEventRow_(sheet, guestId);
+
+  if (!row) {
+    return null;
+  }
+
+  const values = sheet.getRange(row, 1, 1, EVENT_HEADERS.length).getValues()[0];
+
+  return {
+    guestId: values[0],
+    firstName: values[1],
+    lastName: values[2],
+    email: values[3],
+    phone: values[4],
+    city: values[5],
+    state: values[6],
+    memberStatus: values[7] === true ? "Member" : "Guest",
+  };
+}
+
+function getSheet_(sheetName) {
+  const spreadsheet = SpreadsheetApp.openById(SPREADSHEET_ID);
+  let sheet = spreadsheet.getSheetByName(sheetName);
+
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(sheetName);
+  }
+
+  return sheet;
+}
+
+function ensureEventSheet_() {
+  const sheet = getSheet_(SHEETS.activeEvent);
+  const headerRange = sheet.getRange(HEADER_ROW, 1, 1, EVENT_HEADERS.length);
+
+  if (headerRange.getValues()[0].every(function (value) { return value === ""; })) {
+    headerRange.setValues([EVENT_HEADERS]);
+    headerRange.setFontWeight("bold");
+    sheet.setFrozenRows(HEADER_ROW);
+  }
+
+  const checkboxRange = sheet.getRange(DATA_START_ROW, 8, Math.max(1, sheet.getMaxRows() - DATA_START_ROW + 1), 8);
+  checkboxRange.insertCheckboxes();
+}
+
+function appendEventSignup_(guest) {
+  const sheet = getSheet_(SHEETS.activeEvent);
+  const row = findNextEventRow_(sheet);
+  const formulaRow = row;
+
+  sheet.getRange(row, 1, 1, EVENT_HEADERS.length).setValues([[
+    guest.guestId,
+    guest.firstName,
+    guest.lastName,
+    guest.email,
+    guest.phone,
+    guest.city,
+    guest.state,
+    guest.memberStatus === "Member",
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    "=COUNTIF(H" + formulaRow + ":O" + formulaRow + ",TRUE)",
+    "=P" + formulaRow,
+    guest.updatedAt,
+  ]]);
+}
+
+function findNextEventRow_(sheet) {
+  const maxRows = sheet.getMaxRows();
+  const values = sheet.getRange(DATA_START_ROW, 1, maxRows - DATA_START_ROW + 1, 1).getValues();
+
+  for (let i = 0; i < values.length; i += 1) {
+    if (!values[i][0]) {
+      return DATA_START_ROW + i;
+    }
+  }
+
+  sheet.insertRowsAfter(maxRows, 500);
+  return maxRows + 1;
+}
+
+function markEventPunch_(guestId, stationId, updatedAt) {
+  const column = EVENT_PUNCH_COLUMNS[stationId];
+
+  if (!column) {
+    return;
+  }
+
+  const sheet = getSheet_(SHEETS.activeEvent);
+  const row = findEventRow_(sheet, guestId);
+
+  if (!row) {
+    throw new Error("Guest not found: " + guestId);
+  }
+
+  sheet.getRange(row, column).setValue(true);
+  sheet.getRange(row, 18).setValue(updatedAt);
+
+  return getEventPunches_(guestId).length;
+}
+
+function findEventPunch_(guestId, stationId) {
+  const column = EVENT_PUNCH_COLUMNS[stationId];
+
+  if (!column) {
+    return null;
+  }
+
+  const sheet = getSheet_(SHEETS.activeEvent);
+  const row = findEventRow_(sheet, guestId);
+
+  if (!row) {
+    return null;
+  }
+
+  if (sheet.getRange(row, column).getValue() !== true) {
+    return null;
+  }
+
+  return {
+    guestId,
+    stationId,
+    stationName: STATIONS[stationId].name,
+    entries: sheet.getRange(row, 17).getValue() || 0,
+  };
+}
+
+function getEventPunches_(guestId) {
+  const sheet = getSheet_(SHEETS.activeEvent);
+  const row = findEventRow_(sheet, guestId);
+
+  if (!row) {
+    return [];
+  }
+
+  const checks = sheet.getRange(row, 8, 1, 8).getValues()[0];
+  return stationList_()
+    .filter(function (station) {
+      const column = EVENT_PUNCH_COLUMNS[station.id];
+      return column && checks[column - 8] === true;
+    })
+    .map(function (station) {
+      return {
+        stationId: station.id,
+        stationName: station.name,
+      };
+    });
+}
+
+function findEventRow_(sheet, guestId) {
+  const lastRow = sheet.getLastRow();
+
+  if (lastRow < DATA_START_ROW) {
+    return null;
+  }
+
+  const values = sheet.getRange(DATA_START_ROW, 1, lastRow - DATA_START_ROW + 1, 1).getValues();
+
+  for (let i = 0; i < values.length; i += 1) {
+    if (String(values[i][0]).toUpperCase() === guestId) {
+      return DATA_START_ROW + i;
+    }
+  }
+
+  return null;
+}
+
+function stationList_() {
+  return Object.keys(STATIONS).map(function (key) {
+    return STATIONS[key];
+  });
+}
+
+function normalizeParams_(params) {
+  const payload = {};
+
+  Object.keys(params || {}).forEach(function (key) {
+    payload[key] = params[key];
+  });
+
+  return payload;
+}
+
+function parsePayload_(event) {
+  if (!event || !event.postData || !event.postData.contents) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(event.postData.contents);
+  } catch (error) {
+    return normalizeParams_(event.parameter || {});
+  }
+}
+
+function clean_(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+
+  return String(value).trim();
+}
+
+function json_(payload) {
+  return ContentService
+    .createTextOutput(JSON.stringify(payload))
+    .setMimeType(ContentService.MimeType.JSON);
+}

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Staff Scanner Home | Lake Erie Arms</title>
+    <link rel="icon" href="../images/logo.png" type="image/png">
+    <link rel="stylesheet" href="event.css">
+  </head>
+  <body>
+    <main class="page staff-page">
+      <header class="topbar">
+        <a class="brand" href="staff.html">
+          <img src="../images/logo.png" alt="Lake Erie Arms">
+          <span>Staff scanner home</span>
+        </a>
+        <div class="topbar-actions">
+          <a class="sheet-link" href="index.html">Customer signup</a>
+          <a class="sheet-link" id="sheetLink" target="_blank" rel="noreferrer">Open tracker</a>
+        </div>
+      </header>
+
+      <section class="staff-hero">
+        <div class="intro">
+          <p class="eyebrow">Choose your station</p>
+          <h1>Staff scanner home</h1>
+          <p>Open this page at the event, tap your station, then scan the customer QR pass or type the Guest ID backup.</p>
+        </div>
+      </section>
+
+      <section class="staff-section" aria-labelledby="attractionsTitle">
+        <div class="section-heading">
+          <p class="eyebrow">Attractions</p>
+          <h2 id="attractionsTitle">Experience punches</h2>
+        </div>
+        <div class="staff-grid">
+          <a class="staff-tile lul" href="level-up-live-immersion-zone.html">
+            <span>Level Up Live</span>
+            <strong>Immersion Zone</strong>
+            <em>1 free mag in LUL</em>
+          </a>
+          <a class="staff-tile lul" href="level-up-live-action-zone.html">
+            <span>Level Up Live</span>
+            <strong>Action Zone</strong>
+            <em>1 free run in Action Zone</em>
+          </a>
+          <a class="staff-tile" href="range.html">
+            <span>Lake Erie Arms</span>
+            <strong>Range</strong>
+            <em>Free shooting on LEA Range</em>
+          </a>
+          <a class="staff-tile" href="photobooth.html">
+            <span>Social</span>
+            <strong>Photobooth</strong>
+            <em>Photo in booth and post/tag</em>
+          </a>
+        </div>
+      </section>
+
+      <section class="staff-section" aria-labelledby="purchaseTitle">
+        <div class="section-heading">
+          <p class="eyebrow">Purchases</p>
+          <h2 id="purchaseTitle">Purchase and membership punches</h2>
+        </div>
+        <div class="staff-grid">
+          <a class="staff-tile purchase" href="retail.html">
+            <span>Purchase</span>
+            <strong>Retail</strong>
+            <em>Make purchase at Retail</em>
+          </a>
+          <a class="staff-tile purchase" href="caliber-club-cafe.html?station=lea-cafe">
+            <span>Purchase</span>
+            <strong>LEA Cafe</strong>
+            <em>Make purchase at LEA Cafe</em>
+          </a>
+          <a class="staff-tile purchase" href="caliber-club-cafe.html?station=caliber-club">
+            <span>Purchase</span>
+            <strong>Caliber Club</strong>
+            <em>Make purchase at Caliber Club</em>
+          </a>
+          <a class="staff-tile member" href="member.html">
+            <span>Membership</span>
+            <strong>Member</strong>
+            <em>Is member or purchased membership</em>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <script src="config.js"></script>
+    <script>
+      const sheetLink = document.querySelector("#sheetLink");
+      if (sheetLink && window.LEA_EVENT_CONFIG) {
+        sheetLink.href = window.LEA_EVENT_CONFIG.spreadsheetUrl;
+      }
+    </script>
+  </body>
+</html>
