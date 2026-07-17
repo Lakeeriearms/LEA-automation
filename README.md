@@ -1,30 +1,37 @@
-# Lake Erie Arms Event Punch Card
+# Lake Erie Arms Pass Automation
 
-Standalone project for the event punch-card signup, QR pass, staff scanner pages, Google Apps Script backend, and shared image assets.
+Single GitHub Pages repository for the Lake Erie Arms day-pass and event-pass
+customer flows.
 
-## Start Here
+## Site routes
 
-- Customer signup: `event-pass/index.html`
-- Staff scanner home: `event-pass/staff.html`
-- Apps Script backend: `google-apps-script/Code.gs`
-- Setup notes: `event-pass/README.md`
+- Day pass: `day-pass/index.html`
+- Event pass signup: `event-pass/index.html`
+- Event pass staff scanner: `event-pass/staff.html`
 
-The Google Sheet tracker is:
+When the custom domain is connected, the customer URLs will be:
 
-https://docs.google.com/spreadsheets/d/153NX95UFh8mMzU0i27PknaB2BaRGFOxhq2zaGaVUmj8/edit
+- `https://learmspass.net/day-pass/`
+- `https://learmspass.net/event-pass/`
 
-## Sheet Structure
+## Project structure
 
-- `Admin Dashboard` tracks people signed up, codes remaining out of 100,000, total punches, raffle entries, and punch counts by location.
-- `Event - Main` is the active event sheet with attendee contact fields and punch checkboxes.
-- `Event Template` should be copied for future events so each event can have its own tab.
-- `Staff Links` is a printable/reference tab for station URLs.
-- Legacy setup/audit tabs are hidden; the backend now uses `Event - Main` as the operational source of truth.
+- `day-pass/` contains the day-pass form, assets, and its Google Apps Script
+  backend source.
+- `event-pass/` contains event signup, QR pass, station, and staff scanner pages.
+- `google-apps-script/` contains the event-pass backend source.
+- `images/` contains the shared event-pass image assets.
 
-Attendee codes use this pattern:
+Customer information must not be committed to this repository. Submitted data
+is handled by the respective Google Apps Script deployment and Google Sheet.
 
-```txt
-LEA-YYMMDD-XXXXXXXXXX
+## Local preview
+
+From the repository root:
+
+```sh
+python3 -m http.server 4173
 ```
 
-The 10-character suffix contains letters and digits and has far more than 100,000 possible combinations.
+Then open `http://localhost:4173/day-pass/` or
+`http://localhost:4173/event-pass/`.

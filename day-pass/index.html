@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lake Erie Arms Day Pass</title>
+    <meta
+      name="description"
+      content="Digital restaurant day pass for Lake Erie Arms guests."
+    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="styles.css?v=20260707-blue">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="brand-panel" aria-label="Caliber Club Day Pass">
+        <div class="club-lockup">
+          <div class="club-topline">
+            <img class="club-bullet" src="images/CC-Bullet.png" alt="">
+            <h1>
+              <span>Day</span>
+              <span>Pass</span>
+            </h1>
+          </div>
+          <img class="club-text" src="images/CC-Text.webp" alt="Caliber Club">
+        </div>
+      </section>
+
+      <section id="formView" class="flow-panel" aria-labelledby="formTitle">
+        <div class="panel-heading">
+          <p class="eyebrow">Guest Check-In</p>
+          <h2 id="formTitle">Get your day pass</h2>
+        </div>
+
+        <form id="dayPassForm" class="guest-form">
+          <div class="field-grid">
+            <label>
+              <span>First name</span>
+              <input name="firstName" autocomplete="given-name" required>
+            </label>
+            <label>
+              <span>Last name</span>
+              <input name="lastName" autocomplete="family-name" required>
+            </label>
+          </div>
+
+          <label>
+            <span>Mobile phone</span>
+            <input
+              name="phone"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="(555) 555-5555"
+              required
+            >
+          </label>
+
+          <label>
+            <span>Email</span>
+            <input
+              name="email"
+              type="email"
+              autocomplete="email"
+              placeholder="name@example.com"
+            >
+          </label>
+
+          <div class="field-grid">
+            <label>
+              <span>ZIP code</span>
+              <input
+                name="zip"
+                inputmode="numeric"
+                autocomplete="postal-code"
+                maxlength="10"
+                required
+              >
+            </label>
+            <label>
+              <span>Referral</span>
+              <select name="referral" required>
+                <option value="">Select one</option>
+                <option>Member referral</option>
+                <option>Social media</option>
+                <option>Google search</option>
+                <option>Event</option>
+                <option>Drive-by</option>
+                <option>Other</option>
+              </select>
+            </label>
+          </div>
+
+          <label>
+            <span>Visit type</span>
+            <select name="visitType" required>
+              <option value="">Select one</option>
+              <option>Restaurant</option>
+              <option>Cigar Lounge</option>
+              <option>Sauna</option>
+            </select>
+          </label>
+
+          <label class="checkbox-row">
+            <input name="restaurantOnlyAcknowledged" type="checkbox" required>
+            <span>
+              I understand this pass is valid today for the selected access only.
+            </span>
+          </label>
+
+          <label class="checkbox-row">
+            <input name="marketingConsent" type="checkbox">
+            <span>
+              Send me Lake Erie Arms offers and updates by text or email.
+              Message and data rates may apply.
+            </span>
+          </label>
+
+          <div id="formError" class="form-error" role="alert" hidden></div>
+
+          <button class="primary-action" type="submit">
+            Create Day Pass
+          </button>
+        </form>
+      </section>
+
+      <section id="passView" class="pass-panel" aria-labelledby="passTitle" hidden>
+        <div class="pass-card">
+          <div class="pass-topline">
+            <div>
+              <p class="eyebrow">Valid Today</p>
+              <h2 id="passTitle">Caliber Club Day Pass</h2>
+            </div>
+            <img class="pass-mark" src="images/CC-Bullet.png" alt="">
+          </div>
+
+          <div class="pass-guest">
+            <span>Guest</span>
+            <strong id="passGuest">Guest Name</strong>
+          </div>
+
+          <div class="pass-details">
+            <div>
+              <span>Date</span>
+              <strong id="passDate">Today</strong>
+            </div>
+            <div>
+              <span>Pass #</span>
+              <strong id="passNumber">LEA-0000</strong>
+            </div>
+            <div>
+              <span>Access</span>
+              <strong id="passAccess">Selected Access</strong>
+            </div>
+            <div>
+              <span>Expires</span>
+              <strong>End of day</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="pass-actions">
+          <button id="savePassButton" class="secondary-action" type="button">
+            Save Screenshot
+          </button>
+          <a
+            class="membership-link"
+            href="https://www.learms.net/memberships"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View Membership Options
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js?v=20260716-source-tracking"></script>
+  </body>
+</html>
