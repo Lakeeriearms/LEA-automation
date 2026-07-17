@@ -4,7 +4,8 @@ This folder contains the customer signup/pass flow and employee station scanner 
 
 ## Pages
 
-- `index.html` - customer signup start page
+- `index.html` - event chooser
+- `signup.html` - active event customer signup
 - `staff.html` - staff scanner home page
 - `pass.html` - customer QR pass for screenshotting
 - `level-up-live-immersion-zone.html` - 1 free mag in Level Up Live

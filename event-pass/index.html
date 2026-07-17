@@ -3,92 +3,58 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Lake Erie Arms Event Sign Up</title>
+    <meta name="description" content="Choose a Lake Erie Arms event.">
+    <title>Lake Erie Arms | Events</title>
     <link rel="icon" href="../images/logo.png" type="image/png">
-    <link rel="stylesheet" href="event.css">
+    <style>
+      :root { color-scheme: dark; --black: #050505; --panel: rgba(20, 22, 26, 0.92); --line: rgba(255, 255, 255, 0.15); --text: #f5f5f5; --muted: #bec3ca; --red: #b01722; --gold: #f0c35a; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      * { box-sizing: border-box; }
+      body { min-height: 100vh; margin: 0; color: var(--text); background: linear-gradient(90deg, rgba(5, 5, 5, 0.98), rgba(5, 5, 5, 0.76)), url("../images/hero-load.jpg") center / cover fixed, var(--black); }
+      main { width: min(100% - 40px, 1040px); min-height: 100vh; margin: 0 auto; padding: clamp(30px, 6vw, 72px) 0; }
+      .brand { display: inline-flex; align-items: center; gap: 13px; color: var(--text); font-weight: 800; text-decoration: none; }
+      .brand img { width: 148px; height: auto; }
+      .brand span { border-left: 1px solid var(--line); padding-left: 13px; font-size: 0.82rem; letter-spacing: 0.04em; text-transform: uppercase; }
+      header { margin: clamp(52px, 8vw, 94px) 0 35px; max-width: 690px; }
+      .eyebrow { margin: 0 0 11px; color: #f0b9be; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+      h1 { margin: 0; font-size: clamp(2.4rem, 6vw, 4.2rem); line-height: 0.98; letter-spacing: -0.055em; }
+      header > p:last-child { margin: 19px 0 0; color: var(--muted); line-height: 1.6; }
+      .event-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(250px, 0.7fr); gap: 18px; align-items: stretch; }
+      .event-card, .empty-card { border: 1px solid var(--line); border-radius: 12px; background: var(--panel); box-shadow: 0 20px 55px rgba(0, 0, 0, 0.28); }
+      .event-card { padding: clamp(25px, 4vw, 40px); }
+      .status { display: inline-flex; padding: 6px 9px; border-radius: 999px; color: #111; background: var(--gold); font-size: 0.68rem; font-weight: 900; letter-spacing: 0.09em; text-transform: uppercase; }
+      h2 { margin: 19px 0 0; font-size: clamp(1.55rem, 3vw, 2.15rem); letter-spacing: -0.04em; }
+      .event-card p { max-width: 54ch; margin: 12px 0 28px; color: var(--muted); line-height: 1.58; }
+      .button { display: inline-flex; align-items: center; gap: 11px; padding: 13px 17px; border-radius: 7px; color: white; background: var(--red); font-size: 0.9rem; font-weight: 800; text-decoration: none; }
+      .button:hover, .button:focus-visible { background: #e22c38; }
+      .button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+      .empty-card { padding: 29px; background: rgba(19, 21, 25, 0.76); }
+      .empty-card h2 { margin: 0; font-size: 1.15rem; }
+      .empty-card p { margin: 11px 0 0; color: var(--muted); line-height: 1.55; }
+      .note { margin: 28px 0 0; color: rgba(255,255,255,0.58); font-size: 0.83rem; line-height: 1.55; }
+      @media (max-width: 680px) { .event-grid { grid-template-columns: 1fr; } .brand span { display: none; } }
+    </style>
   </head>
   <body>
-    <main class="page">
-      <header class="topbar">
-        <a class="brand" href="index.html">
-          <img src="../images/logo.png" alt="Lake Erie Arms">
-          <span>Event Punch Card</span>
-        </a>
-        <div class="topbar-actions">
-          <a class="sheet-link" href="staff.html">Staff scanners</a>
-          <a class="sheet-link" id="sheetLink" target="_blank" rel="noreferrer">Open tracker</a>
-        </div>
+    <main>
+      <a class="brand" href="../index.html"><img src="../images/logo.png" alt="Lake Erie Arms"><span>Events</span></a>
+      <header>
+        <p class="eyebrow">Lake Erie Arms events</p>
+        <h1>Choose your event.</h1>
+        <p>Start with the event listed on your invitation. Each event gets its own signup and digital pass.</p>
       </header>
-
-      <section class="hero">
-        <div class="intro">
-          <p class="eyebrow">Start here</p>
-          <h1>Lake Erie Arms event pass</h1>
-          <p>Sign up once, screenshot your QR pass, and show it at each station to collect punches for prizes and raffle entries.</p>
-          <a class="btn secondary staff-home-cta" href="staff.html">Open staff scanner home</a>
-        </div>
-
-        <section class="panel" aria-labelledby="signupTitle">
-          <div class="panel-header">
-            <h2 id="signupTitle">Customer sign up</h2>
-            <p>This creates the QR code employees scan at every attraction.</p>
-          </div>
-          <form class="form" id="signupForm">
-            <div class="grid-2">
-              <div class="field">
-                <label for="firstName">First name</label>
-                <input id="firstName" name="firstName" autocomplete="given-name" required>
-              </div>
-              <div class="field">
-                <label for="lastName">Last name</label>
-                <input id="lastName" name="lastName" autocomplete="family-name" required>
-              </div>
-            </div>
-
-            <div class="grid-2">
-              <div class="field">
-                <label for="phone">Phone</label>
-                <input id="phone" name="phone" autocomplete="tel" inputmode="tel">
-              </div>
-              <div class="field">
-                <label for="email">Email</label>
-                <input id="email" name="email" autocomplete="email" inputmode="email">
-              </div>
-            </div>
-
-            <div class="grid-2">
-              <div class="field">
-                <label for="city">City</label>
-                <input id="city" name="city" autocomplete="address-level2">
-              </div>
-              <div class="field">
-                <label for="state">State</label>
-                <input id="state" name="state" autocomplete="address-level1" maxlength="2">
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="memberStatus">Member status</label>
-              <select id="memberStatus" name="memberStatus">
-                <option value="guest">Guest</option>
-                <option value="member">Current member</option>
-              </select>
-            </div>
-
-            <label class="checkbox">
-              <input type="checkbox" id="marketingConsent" name="marketingConsent" checked>
-              Send me Lake Erie Arms event, range, and promo updates.
-            </label>
-
-            <button class="btn gold" type="submit">Create my QR pass</button>
-            <p class="status" id="signupStatus" role="status"></p>
-          </form>
-        </section>
+      <section class="event-grid" aria-label="Available events">
+        <article class="event-card">
+          <span class="status">Active event</span>
+          <h2>Lake Erie Arms Event Pass</h2>
+          <p>Sign up once to create your digital QR pass. Show it at participating stations to collect punches, prizes, and raffle entries.</p>
+          <a class="button" href="signup.html">Sign up for this event <span aria-hidden="true">-&gt;</span></a>
+        </article>
+        <aside class="empty-card">
+          <h2>More events coming soon</h2>
+          <p>New events will appear here when registration opens. Your event email, text, or QR code will always take you directly to the right event.</p>
+        </aside>
       </section>
+      <p class="note">Do not see your event? Use the event-specific link from your Lake Erie Arms invitation.</p>
     </main>
-
-    <script src="config.js"></script>
-    <script src="api.js"></script>
-    <script src="signup.js"></script>
   </body>
 </html>

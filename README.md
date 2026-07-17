@@ -6,7 +6,8 @@ customer flows.
 ## Site routes
 
 - Day pass: `day-pass/index.html`
-- Event pass signup: `event-pass/index.html`
+- Event list: `event-pass/index.html`
+- Active event signup: `event-pass/signup.html`
 - Event pass staff scanner: `event-pass/staff.html`
 
 When the custom domain is connected, the customer URLs will be:
