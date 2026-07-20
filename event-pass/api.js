@@ -187,6 +187,9 @@
     }
 
     return new Promise((resolve, reject) => {
+      if (config.eventKey && payload.eventKey === undefined) {
+        payload.eventKey = config.eventKey;
+      }
       const callback = `leaEventCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
       const url = new URL(config.apiUrl);
       Object.entries(payload).forEach(([key, value]) => {

@@ -25,6 +25,7 @@
     data.action = "signup";
     data.marketingConsent = document.querySelector("#marketingConsent").checked;
     data.signupSource = "Event signup page";
+    data.eventKey = window.LEAEvent.config.eventKey || "event-main";
 
     submit.disabled = true;
     setStatus("Creating pass...", "");
@@ -37,7 +38,12 @@
       }
 
       window.LEAEvent.setStoredGuest(response.guest);
-      window.location.href = `pass.html?id=${encodeURIComponent(response.guest.guestId)}`;
+      const passUrl = new URL(window.LEAEvent.config.passPath || "pass.html", window.location.href);
+      passUrl.searchParams.set("id", response.guest.guestId);
+      if (window.LEAEvent.config.eventKey) {
+        passUrl.searchParams.set("event", window.LEAEvent.config.eventKey);
+      }
+      window.location.href = passUrl.toString();
     } catch (error) {
       setStatus(error.message, "bad");
       submit.disabled = false;

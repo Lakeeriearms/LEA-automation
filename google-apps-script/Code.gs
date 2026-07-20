@@ -1,10 +1,18 @@
-const SPREADSHEET_ID = "1XAj47kCYJ7MMK4WcsLmGhCyLbRzbMDgfMYw7RKPO_yw";
-const EVENT_NAME = "Lake Erie Arms Event Punch Card";
+const SPREADSHEET_ID = "153NX95UFh8mMzU0i27PknaB2BaRGFOxhq2zaGaVUmj8";
 const HEADER_ROW = 4;
 const DATA_START_ROW = 5;
 
-const SHEETS = {
-  activeEvent: "Event - Main",
+const EVENTS = {
+  "event-main": {
+    key: "event-main",
+    name: "Lake Erie Arms Event Punch Card",
+    sheetName: "Event - Main",
+  },
+  "try-before-you-buy": {
+    key: "try-before-you-buy",
+    name: "Try Before You Buy",
+    sheetName: "Try Before You Buy - Aug 8-9",
+  },
 };
 
 const EVENT_CODE_CAPACITY = 100000;
@@ -130,21 +138,22 @@ function doPost(event) {
 
 function route_(payload) {
   try {
-    setupWorkbook_();
+    const event = getEvent_(payload.eventKey);
+    setupWorkbook_(event);
 
     switch (payload.action) {
       case "signup":
-        return signup_(payload);
+        return signup_(payload, event);
       case "scan":
-        return scan_(payload);
+        return scan_(payload, event);
       case "lookup":
-        return lookup_(payload);
+        return lookup_(payload, event);
       case "stations":
-        return { ok: true, eventName: EVENT_NAME, stations: stationList_() };
+        return { ok: true, eventName: event.name, stations: stationList_() };
       default:
         return {
           ok: true,
-          eventName: EVENT_NAME,
+          eventName: event.name,
           message: "Lake Erie Arms event punch card endpoint is running.",
           actions: ["signup", "scan", "lookup", "stations"],
           stations: stationList_(),
@@ -155,7 +164,7 @@ function route_(payload) {
   }
 }
 
-function signup_(payload) {
+function signup_(payload, event) {
   const firstName = clean_(payload.firstName);
   const lastName = clean_(payload.lastName);
   const phone = clean_(payload.phone);
@@ -167,7 +176,7 @@ function signup_(payload) {
     throw new Error("First name, last name, and phone or email are required.");
   }
 
-  const guestId = createUniqueGuestId_();
+  const guestId = createUniqueGuestId_(event);
   const now = new Date();
   const memberStatus = normalizeMembershipStatus_(payload.memberStatus);
 
@@ -181,7 +190,7 @@ function signup_(payload) {
     state,
     memberStatus,
     updatedAt: now,
-  });
+  }, event);
 
   return {
     ok: true,
@@ -200,7 +209,7 @@ function signup_(payload) {
   };
 }
 
-function scan_(payload) {
+function scan_(payload, event) {
   const guestId = clean_(payload.guestId).toUpperCase();
   const stationId = clean_(payload.stationId);
   const station = STATIONS[stationId];
@@ -213,12 +222,12 @@ function scan_(payload) {
     throw new Error("Unknown station: " + stationId);
   }
 
-  const guest = findEventGuest_(guestId);
+  const guest = findEventGuest_(guestId, event);
   if (!guest) {
     throw new Error("Guest not found: " + guestId);
   }
 
-  const existingPunch = findEventPunch_(guestId, stationId);
+  const existingPunch = findEventPunch_(guestId, stationId, event);
   if (existingPunch) {
     return {
       ok: true,
@@ -234,7 +243,7 @@ function scan_(payload) {
   const now = new Date();
   const scanId = "SCAN-" + Utilities.getUuid().slice(0, 8).toUpperCase();
 
-  const updatedPunches = markEventPunch_(guestId, station.id, now);
+  const updatedPunches = markEventPunch_(guestId, station.id, now, event);
 
   return {
     ok: true,
@@ -251,9 +260,9 @@ function scan_(payload) {
   };
 }
 
-function lookup_(payload) {
+function lookup_(payload, event) {
   const guestId = clean_(payload.guestId).toUpperCase();
-  const guest = findEventGuest_(guestId);
+  const guest = findEventGuest_(guestId, event);
 
   if (!guest) {
     throw new Error("Guest not found: " + guestId);
@@ -262,13 +271,13 @@ function lookup_(payload) {
   return {
     ok: true,
     guest,
-    punches: getEventPunches_(guestId),
+    punches: getEventPunches_(guestId, event),
     stations: stationList_(),
   };
 }
 
-function setupWorkbook_() {
-  ensureEventSheet_();
+function setupWorkbook_(event) {
+  ensureEventSheet_(event);
 }
 
 function createGuestId_() {
@@ -277,11 +286,11 @@ function createGuestId_() {
   return "LEA-" + date + "-" + suffix;
 }
 
-function createUniqueGuestId_() {
+function createUniqueGuestId_(event) {
   for (let attempt = 0; attempt < 20; attempt += 1) {
     const guestId = createGuestId_();
 
-    if (!findEventRow_(getSheet_(SHEETS.activeEvent), guestId)) {
+    if (!findEventRow_(getSheet_(event.sheetName), guestId)) {
       return guestId;
     }
   }
@@ -289,8 +298,8 @@ function createUniqueGuestId_() {
   throw new Error("Unable to create a unique guest code. Try again.");
 }
 
-function findEventGuest_(guestId) {
-  const sheet = getSheet_(SHEETS.activeEvent);
+function findEventGuest_(guestId, event) {
+  const sheet = getSheet_(event.sheetName);
   const row = findEventRow_(sheet, guestId);
 
   if (!row) {
@@ -322,8 +331,8 @@ function getSheet_(sheetName) {
   return sheet;
 }
 
-function ensureEventSheet_() {
-  const sheet = getSheet_(SHEETS.activeEvent);
+function ensureEventSheet_(event) {
+  const sheet = getSheet_(event.sheetName);
   const headerRange = sheet.getRange(HEADER_ROW, 1, 1, EVENT_HEADERS.length);
 
   if (headerRange.getValues()[0].every(function (value) { return value === ""; })) {
@@ -342,8 +351,8 @@ function ensureEventSheet_() {
   checkboxRange.insertCheckboxes();
 }
 
-function appendEventSignup_(guest) {
-  const sheet = getSheet_(SHEETS.activeEvent);
+function appendEventSignup_(guest, event) {
+  const sheet = getSheet_(event.sheetName);
   const row = findNextEventRow_(sheet);
   const formulaRow = row;
 
@@ -384,14 +393,14 @@ function findNextEventRow_(sheet) {
   return maxRows + 1;
 }
 
-function markEventPunch_(guestId, stationId, updatedAt) {
+function markEventPunch_(guestId, stationId, updatedAt, event) {
   const column = EVENT_PUNCH_COLUMNS[stationId];
 
   if (!column) {
     return;
   }
 
-  const sheet = getSheet_(SHEETS.activeEvent);
+  const sheet = getSheet_(event.sheetName);
   const row = findEventRow_(sheet, guestId);
 
   if (!row) {
@@ -401,17 +410,17 @@ function markEventPunch_(guestId, stationId, updatedAt) {
   sheet.getRange(row, column).setValue(true);
   sheet.getRange(row, 18).setValue(updatedAt);
 
-  return getEventPunches_(guestId).length;
+  return getEventPunches_(guestId, event).length;
 }
 
-function findEventPunch_(guestId, stationId) {
+function findEventPunch_(guestId, stationId, event) {
   const column = EVENT_PUNCH_COLUMNS[stationId];
 
   if (!column) {
     return null;
   }
 
-  const sheet = getSheet_(SHEETS.activeEvent);
+  const sheet = getSheet_(event.sheetName);
   const row = findEventRow_(sheet, guestId);
 
   if (!row) {
@@ -430,8 +439,8 @@ function findEventPunch_(guestId, stationId) {
   };
 }
 
-function getEventPunches_(guestId) {
-  const sheet = getSheet_(SHEETS.activeEvent);
+function getEventPunches_(guestId, event) {
+  const sheet = getSheet_(event.sheetName);
   const row = findEventRow_(sheet, guestId);
 
   if (!row) {
@@ -468,6 +477,17 @@ function findEventRow_(sheet, guestId) {
   }
 
   return null;
+}
+
+function getEvent_(eventKey) {
+  const key = clean_(eventKey) || "event-main";
+  const event = EVENTS[key];
+
+  if (!event) {
+    throw new Error("Unknown event: " + key);
+  }
+
+  return event;
 }
 
 function stationList_() {
