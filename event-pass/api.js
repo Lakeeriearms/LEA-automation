@@ -14,7 +14,7 @@
     range: {
       id: "range",
       name: "LEA Range",
-      checklistItem: "Free Shooting on LEA Range",
+      checklistItem: "Shoot at the Range",
       baseEntries: 1,
       purchaseBonusEntries: 0,
       allowsPurchase: false,
@@ -22,7 +22,7 @@
     "level-up-live-immersion-zone": {
       id: "level-up-live-immersion-zone",
       name: "Level Up Live Immersion Zone",
-      checklistItem: "1 Free Mag in LUL",
+      checklistItem: "Play in the Immersive Zone",
       baseEntries: 1,
       purchaseBonusEntries: 0,
       allowsPurchase: false,
@@ -30,7 +30,7 @@
     "level-up-live-action-zone": {
       id: "level-up-live-action-zone",
       name: "Level Up Live Action Zone",
-      checklistItem: "1 Free Run in Action Zone",
+      checklistItem: "Play in the Action Zone",
       baseEntries: 1,
       purchaseBonusEntries: 0,
       allowsPurchase: false,
