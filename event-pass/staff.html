@@ -16,7 +16,6 @@
         </a>
         <div class="topbar-actions">
           <a class="sheet-link" href="index.html">Customer signup</a>
-          <a class="sheet-link" id="sheetLink" target="_blank" rel="noreferrer">Open tracker</a>
         </div>
       </header>
 
@@ -88,11 +87,5 @@
     </main>
 
     <script src="config.js"></script>
-    <script>
-      const sheetLink = document.querySelector("#sheetLink");
-      if (sheetLink && window.LEA_EVENT_CONFIG) {
-        sheetLink.href = window.LEA_EVENT_CONFIG.spreadsheetUrl;
-      }
-    </script>
   </body>
 </html>
