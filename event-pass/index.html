@@ -24,9 +24,11 @@
       .status { display: inline-flex; padding: 6px 9px; border-radius: 999px; color: #111; background: var(--gold); font-size: 0.68rem; font-weight: 900; letter-spacing: 0.09em; text-transform: uppercase; }
       h2 { margin: 19px 0 0; font-size: clamp(1.55rem, 3vw, 2.15rem); letter-spacing: -0.04em; }
       .event-card p { max-width: 54ch; margin: 12px 0 28px; color: var(--muted); line-height: 1.58; }
-      .button { display: inline-flex; align-items: center; gap: 11px; padding: 13px 17px; border-radius: 7px; color: white; background: var(--red); font-size: 0.9rem; font-weight: 800; text-decoration: none; }
-      .button:hover, .button:focus-visible { background: #e22c38; }
+      .button { display: inline-flex; align-items: center; gap: 12px; min-height: 52px; padding: 11px 12px 11px 18px; border-radius: 7px; color: white; background: var(--red); font-size: 0.9rem; font-weight: 800; text-decoration: none; box-shadow: 0 14px 30px rgba(176, 23, 34, 0.24); transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease; }
+      .button:hover, .button:focus-visible { background: #e22c38; transform: translateY(-1px); box-shadow: 0 18px 36px rgba(226, 44, 56, 0.28); }
       .button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+      .button-arrow { width: 28px; height: 28px; display: inline-grid; place-items: center; flex: 0 0 auto; border: 1px solid rgba(255, 255, 255, 0.42); border-radius: 999px; background: rgba(255, 255, 255, 0.14); font-size: 1.02rem; line-height: 1; transition: transform 160ms ease, background 160ms ease, color 160ms ease; }
+      .button:hover .button-arrow, .button:focus-visible .button-arrow { transform: translateX(2px); background: white; color: var(--red); }
       .empty-card { padding: 29px; background: rgba(19, 21, 25, 0.76); }
       .empty-card h2 { margin: 0; font-size: 1.15rem; }
       .empty-card p { margin: 11px 0 0; color: var(--muted); line-height: 1.55; }
@@ -47,13 +49,13 @@
           <span class="status">Active event</span>
           <h2>Lake Erie Arms Event Pass</h2>
           <p>Sign up once to create your digital QR pass. Show it at participating stations to collect punches, prizes, and raffle entries.</p>
-          <a class="button" href="signup.html">Sign up for this event <span aria-hidden="true">-&gt;</span></a>
+          <a class="button" href="signup.html">Sign up for this event <span class="button-arrow" aria-hidden="true">&rarr;</span></a>
         </article>
         <article class="event-card">
-          <span class="status">August 8–9, 2026</span>
+          <span class="status">August 8&ndash;9, 2026</span>
           <h2>Try Before You Buy</h2>
           <p>Explore, try, and experience Lake Erie Arms. Register once to create your event-specific digital QR pass.</p>
-          <a class="button" href="try-before-you-buy/">Sign up for this event <span aria-hidden="true">-&gt;</span></a>
+          <a class="button" href="try-before-you-buy/">Sign up for this event <span class="button-arrow" aria-hidden="true">&rarr;</span></a>
         </article>
       </section>
       <p class="note">Do not see your event? Use the event-specific link from your Lake Erie Arms invitation.</p>
