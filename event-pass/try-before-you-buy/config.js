@@ -1,7 +1,7 @@
 window.LEA_EVENT_CONFIG = {
-  apiUrl: "https://script.google.com/macros/s/AKfycbwUEgoZAiNiXeDW3c4ZyIjzyaFvzviewGjxf80FpgxgGNRvKx2ceT5dhAZNMFNCcRpT/exec",
-  spreadsheetId: "153NX95UFh8mMzU0i27PknaB2BaRGFOxhq2zaGaVUmj8",
-  spreadsheetUrl: "https://docs.google.com/spreadsheets/d/153NX95UFh8mMzU0i27PknaB2BaRGFOxhq2zaGaVUmj8/edit",
+  apiUrl: "https://script.google.com/macros/s/AKfycbyaV6UjLzCUwF9HWt4NPXQzU-3SOY4m1-KxQB4S-V9IfospVbGzIbjJBeoKSXYIZNl3cg/exec",
+  spreadsheetId: "1XAj47kCYJ7MMK4WcsLmGhCyLbRzbMDgfMYw7RKPO_yw",
+  spreadsheetUrl: "https://docs.google.com/spreadsheets/d/1XAj47kCYJ7MMK4WcsLmGhCyLbRzbMDgfMYw7RKPO_yw/edit",
   eventKey: "try-before-you-buy",
   eventName: "Field and Range Day",
   passPath: "../pass.html",
