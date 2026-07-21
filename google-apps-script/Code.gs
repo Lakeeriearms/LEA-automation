@@ -10,8 +10,8 @@ const EVENTS = {
   },
   "try-before-you-buy": {
     key: "try-before-you-buy",
-    name: "Try Before You Buy",
-    sheetName: "Try Before You Buy - Aug 8-9",
+    name: "Field and Range Day",
+    sheetName: "Field and Range Day - Aug 8-9",
   },
 };
 

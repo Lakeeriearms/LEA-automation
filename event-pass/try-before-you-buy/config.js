@@ -3,6 +3,6 @@ window.LEA_EVENT_CONFIG = {
   spreadsheetId: "153NX95UFh8mMzU0i27PknaB2BaRGFOxhq2zaGaVUmj8",
   spreadsheetUrl: "https://docs.google.com/spreadsheets/d/153NX95UFh8mMzU0i27PknaB2BaRGFOxhq2zaGaVUmj8/edit",
   eventKey: "try-before-you-buy",
-  eventName: "Try Before You Buy",
+  eventName: "Field and Range Day",
   passPath: "../pass.html",
 };
