@@ -114,16 +114,79 @@
     resultDetail.textContent = `${response.punch.entries} raffle entr${response.punch.entries === 1 ? "y" : "ies"} added.`;
   }
 
+  function loadQrFallback_() {
+    if (window.jsQR) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector("script[data-qr-fallback]");
+      if (existing) {
+        existing.addEventListener("load", resolve, { once: true });
+        existing.addEventListener("error", reject, { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js";
+      script.async = true;
+      script.dataset.qrFallback = "true";
+      script.addEventListener("load", resolve, { once: true });
+      script.addEventListener("error", reject, { once: true });
+      document.head.append(script);
+    });
+  }
+
+  async function createQrReader_() {
+    if ("BarcodeDetector" in window) {
+      try {
+        const detector = new BarcodeDetector({ formats: ["qr_code"] });
+        return async () => {
+          const codes = await detector.detect(video).catch(() => []);
+          return codes.length > 0 ? codes[0].rawValue : "";
+        };
+      } catch (error) {
+        // Fall back to canvas decoding below.
+      }
+    }
+
+    await loadQrFallback_();
+
+    if (typeof window.jsQR !== "function") {
+      throw new Error("QR scanner fallback did not load.");
+    }
+
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+
+    return async () => {
+      const width = video.videoWidth;
+      const height = video.videoHeight;
+
+      if (!width || !height) {
+        return "";
+      }
+
+      if (canvas.width !== width) canvas.width = width;
+      if (canvas.height !== height) canvas.height = height;
+
+      context.drawImage(video, 0, 0, width, height);
+      const imageData = context.getImageData(0, 0, width, height);
+      const code = window.jsQR(imageData.data, width, height, { inversionAttempts: "attemptBoth" });
+      return code && code.data ? code.data : "";
+    };
+  }
+
   async function startCamera() {
-    if (!("mediaDevices" in navigator) || !("BarcodeDetector" in window)) {
-      placeholder.textContent = "Camera QR scanning is not supported in this browser. Type the Guest ID below.";
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      placeholder.textContent = "Camera access is not supported in this browser. Type the Guest ID below.";
       return;
     }
 
     try {
-      const detector = new BarcodeDetector({ formats: ["qr_code"] });
+      const readQrCode = await createQrReader_();
       stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
+        video: { facingMode: { ideal: "environment" } },
         audio: false,
       });
       video.srcObject = stream;
@@ -137,10 +200,10 @@
         }
 
         if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
-          const codes = await detector.detect(video).catch(() => []);
-          if (codes.length > 0) {
+          const rawValue = await readQrCode();
+          if (rawValue) {
             scanning = false;
-            await lookupGuest(codes[0].rawValue);
+            await lookupGuest(rawValue);
             window.setTimeout(() => {
               scanning = true;
               tick();
@@ -154,7 +217,7 @@
 
       tick();
     } catch (error) {
-      placeholder.textContent = "Camera permission was blocked. Type the Guest ID below.";
+      placeholder.textContent = "Camera permission was blocked or the QR scanner could not start. Type the Guest ID below.";
     }
   }
 
