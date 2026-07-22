@@ -8,10 +8,15 @@ const EVENTS = {
     name: "Lake Erie Arms Event Punch Card",
     sheetName: "Event - Main",
   },
+  "range-to-patio-party": {
+    key: "range-to-patio-party",
+    name: "Range to Patio Party",
+    sheetName: "Range to Patio Party - Aug 8-9",
+  },
   "try-before-you-buy": {
-    key: "try-before-you-buy",
-    name: "Field and Range Day",
-    sheetName: "Field and Range Day - Aug 8-9",
+    key: "range-to-patio-party",
+    name: "Range to Patio Party",
+    sheetName: "Range to Patio Party - Aug 8-9",
   },
 };
 

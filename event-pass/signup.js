@@ -38,7 +38,7 @@
       }
 
       window.LEAEvent.setStoredGuest(response.guest);
-      const passUrl = new URL(window.LEAEvent.config.passPath || "pass.html", window.location.href);
+      const passUrl = new URL(window.LEAEvent.config.passPath || "pass/", window.location.href);
       passUrl.searchParams.set("id", response.guest.guestId);
       if (window.LEAEvent.config.eventKey) {
         passUrl.searchParams.set("event", window.LEAEvent.config.eventKey);

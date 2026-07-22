@@ -15,7 +15,7 @@
   }
 
   if (!guest.guestId) {
-    window.location.href = "index.html";
+    window.location.href = "../";
     return;
   }
 

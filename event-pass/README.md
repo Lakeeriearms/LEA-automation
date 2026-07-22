@@ -2,31 +2,35 @@
 
 This folder contains the customer signup/pass flow and employee station scanner pages.
 
-## Pages
+## Public URLs
 
-- `index.html` - event chooser
-- `signup.html` - active event customer signup
-- `staff/` - staff scanner home page
-- `pass.html` - customer QR pass for screenshotting
-- `level-up-live-immersion-zone.html` - 1 free mag in Level Up Live
-- `level-up-live-action-zone.html` - 1 free run in Action Zone
-- `range.html` - free shooting on LEA range
-- `retail.html` - retail purchase
-- `caliber-club-cafe.html?station=lea-cafe` - LEA Cafe purchase
-- `caliber-club-cafe.html?station=caliber-club` - Caliber Club purchase
-- `photobooth.html` - photo booth post/tag
-- `member.html` - member or membership purchase
+- `/event-pass/` - event chooser
+- `/event-pass/signup/` - active event customer signup
+- `/event-pass/range-to-patio-party/` - Range to Patio Party signup
+- `/event-pass/staff/` - staff scanner home page
+- `/event-pass/pass/?id=GUEST_CODE` - customer QR pass for screenshotting
+- `/event-pass/level-up-live-immersion-zone/` - 1 free mag in Level Up Live
+- `/event-pass/level-up-live-action-zone/` - 1 free run in Action Zone
+- `/event-pass/range/` - free shooting on LEA range
+- `/event-pass/retail/` - retail purchase
+- `/event-pass/caliber-club-cafe/?station=lea-cafe` - LEA Cafe purchase
+- `/event-pass/caliber-club-cafe/?station=caliber-club` - Caliber Club purchase
+- `/event-pass/photobooth/` - photo booth post/tag
+- `/event-pass/member/` - member or membership purchase
+
+Legacy `.html` paths redirect to the clean folder URLs.
 
 ## Google Sheet
 
 Tracker:
 
-https://docs.google.com/spreadsheets/d/153NX95UFh8mMzU0i27PknaB2BaRGFOxhq2zaGaVUmj8/edit
+https://docs.google.com/spreadsheets/d/1XAj47kCYJ7MMK4WcsLmGhCyLbRzbMDgfMYw7RKPO_yw/edit
 
 Admin tracking:
 
 - Dashboard counts people signed up, location punches, total punches, raffle entries, and remaining codes.
 - The active event tab is `Event - Main`.
+- Range to Patio Party uses the `Range to Patio Party - Aug 8-9` event tab.
 - Future event tabs should start from `Event Template`.
 - The dashboard countdown assumes a 100,000-code event capacity.
 - The backend reads and writes the active event tab directly; older `Guests`, `Punches`, `Stations`, `Raffle Summary`, and `Setup Notes` tabs are hidden legacy tabs.

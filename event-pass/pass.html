@@ -3,48 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Lake Erie Arms Event Pass</title>
-    <link rel="icon" href="../images/logo.png" type="image/png">
-    <link rel="stylesheet" href="event.css">
+    <meta http-equiv="refresh" content="0; url=pass/">
+    <title>Redirecting | Lake Erie Arms</title>
+    <script>
+      window.location.replace("pass/" + window.location.search + window.location.hash);
+    </script>
   </head>
   <body>
-    <main class="page">
-      <header class="topbar">
-        <a class="brand" href="index.html">
-          <img src="../images/logo.png" alt="Lake Erie Arms">
-          <span>Event Pass</span>
-        </a>
-      </header>
-
-      <section class="hero">
-        <div class="intro">
-          <p class="eyebrow">Screenshot this</p>
-          <h1>Your punch card</h1>
-          <p>Show this QR code at each station. Employees scan it to check off attractions, purchases, membership, and raffle entries.</p>
-          <a class="btn secondary" href="index.html">Create another pass</a>
-        </div>
-
-        <article class="pass-card" id="passCard">
-          <header>
-            <img src="../images/logo.png" alt="Lake Erie Arms">
-            <p class="eyebrow">Digital punch card</p>
-          </header>
-          <h1>Event pass</h1>
-          <div class="guest-name">
-            <span>Guest</span>
-            <strong id="guestName">Guest Name</strong>
-          </div>
-          <div class="qr-frame">
-            <img id="qrImage" alt="Guest QR code">
-            <p class="guest-id" id="guestId">LEA-000000-000000</p>
-          </div>
-          <ul class="checklist" id="checklist"></ul>
-        </article>
-      </section>
-    </main>
-
-    <script src="config.js"></script>
-    <script src="api.js"></script>
-    <script src="pass.js"></script>
+    <p><a href="pass/">Continue</a></p>
   </body>
 </html>

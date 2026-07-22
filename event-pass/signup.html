@@ -3,90 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Lake Erie Arms Event Sign Up</title>
-    <link rel="icon" href="../images/logo.png" type="image/png">
-    <link rel="stylesheet" href="event.css">
+    <meta http-equiv="refresh" content="0; url=signup/">
+    <title>Redirecting | Lake Erie Arms</title>
+    <script>
+      window.location.replace("signup/" + window.location.search + window.location.hash);
+    </script>
   </head>
   <body>
-    <main class="page">
-      <header class="topbar">
-        <a class="brand" href="index.html">
-          <img src="../images/logo.png" alt="Lake Erie Arms">
-          <span>Event Punch Card</span>
-        </a>
-      </header>
-
-      <section class="hero">
-        <div class="intro">
-          <p class="eyebrow">Start here</p>
-          <h1>Lake Erie Arms event pass</h1>
-          <p>Sign up once, <strong style="color: var(--red); font-weight: 900;">screenshot your QR pass</strong>, and show it at each station to collect punches for prizes and raffle entries.</p>
-        </div>
-
-        <section class="panel" aria-labelledby="signupTitle">
-          <div class="panel-header">
-            <h2 id="signupTitle">Customer sign up</h2>
-            <p>This creates the QR code employees scan at every attraction.</p>
-          </div>
-          <form class="form" id="signupForm">
-            <div class="grid-2">
-              <div class="field">
-                <label for="firstName">First name</label>
-                <input id="firstName" name="firstName" autocomplete="given-name" required>
-              </div>
-              <div class="field">
-                <label for="lastName">Last name</label>
-                <input id="lastName" name="lastName" autocomplete="family-name" required>
-              </div>
-            </div>
-
-            <div class="grid-2">
-              <div class="field">
-                <label for="phone">Phone</label>
-                <input id="phone" name="phone" autocomplete="tel" inputmode="tel">
-              </div>
-              <div class="field">
-                <label for="email">Email</label>
-                <input id="email" name="email" autocomplete="email" inputmode="email">
-              </div>
-            </div>
-
-            <div class="grid-2">
-              <div class="field">
-                <label for="city">City</label>
-                <input id="city" name="city" autocomplete="address-level2">
-              </div>
-              <div class="field">
-                <label for="state">State</label>
-                <input id="state" name="state" autocomplete="address-level1" maxlength="2">
-              </div>
-            </div>
-
-            <div class="field">
-              <label for="memberStatus">Member status</label>
-              <select id="memberStatus" name="memberStatus">
-                <option value="non-member">Non member</option>
-                <option value="brass">Brass</option>
-                <option value="gold">Gold</option>
-                <option value="platinum">Platinum</option>
-                <option value="charter">Charter</option>
-              </select>
-            </div>
-
-            <label class="checkbox">
-              <input type="checkbox" id="marketingConsent" name="marketingConsent" checked>
-              Send me Lake Erie Arms event, range, and promo updates.
-            </label>
-
-            <button class="btn gold" type="submit">Create my QR pass</button>
-            <p class="status" id="signupStatus" role="status"></p>
-          </form>
-        </section>
-      </section>
-    </main>
-
-    <script src="config.js"></script>
-    <script src="api.js"></script>
-    <script src="signup.js"></script>
+    <p><a href="signup/">Continue</a></p>
   </body>
 </html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Scan Member | Lake Erie Arms</title>
+    <link rel="icon" href="../../images/logo.png" type="image/png">
+    <link rel="stylesheet" href="../event.css">
+  </head>
+  <body>
+    <main class="page">
+      <header class="topbar">
+        <a class="brand" href="../"><img src="../../images/logo.png" alt="Lake Erie Arms"><span>Staff scanner</span></a>
+        <a class="sheet-link" id="sheetLink" target="_blank" rel="noreferrer">Open tracker</a>
+      </header>
+      <section class="scanner-shell">
+        <article class="station-card"><p class="eyebrow">Membership station</p><h1 id="stationTitle"></h1><p id="stationSubtitle"></p><strong id="stationChecklist"></strong></article>
+        <section class="panel">
+          <div class="reader"><video id="readerVideo" class="hide" autoplay muted playsinline></video><p class="reader-placeholder" id="readerPlaceholder">Starting camera...</p></div>
+          <div class="form">
+            <div class="field"><label for="manualGuestId">Guest ID backup</label><input id="manualGuestId" placeholder="LEA-260707-ABC123"></div>
+            <button class="btn secondary" id="lookupButton" type="button">Look up guest</button>
+            <div class="scan-result hide" id="scanResult"><strong id="resultName"></strong><span class="guest-id" id="resultGuestId"></span><span id="resultDetail"></span></div>
+            <div class="field"><label for="staffName">Staff name</label><input id="staffName" autocomplete="name"></div>
+            <div class="field hide" id="purchaseField"><label for="purchaseAmount">Membership purchase amount</label><input id="purchaseAmount" type="number" min="0" step="0.01" inputmode="decimal"></div>
+            <button class="btn gold" id="confirmButton" type="button" disabled>Confirm punch</button>
+            <p class="status" id="scanStatus" role="status"></p>
+          </div>
+        </section>
+      </section>
+    </main>
+    <script>window.LEA_STATION_ID = "member";</script>
+    <script src="../config.js"></script><script src="../api.js"></script><script src="../station.js"></script>
+  </body>
+</html>
