@@ -378,7 +378,7 @@ function appendEventSignup_(guest, event) {
     false,
     false,
     "=COUNTIF(H" + formulaRow + ":O" + formulaRow + ",TRUE)",
-    "=P" + formulaRow,
+    "=P" + formulaRow + "+IF(P" + formulaRow + "=8,25,0)",
     guest.updatedAt,
     guest.memberStatus,
   ]]);
