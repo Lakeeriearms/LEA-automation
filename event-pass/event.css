@@ -515,12 +515,12 @@ textarea:focus {
 }
 
 .staff-hero {
-  padding: 14px 0 6px;
+  padding: 4px 0 2px;
 }
 
 .staff-hero .intro {
   max-width: 760px;
-  padding-top: 8px;
+  padding-top: 0;
 }
 
 .staff-hero .intro h1 {
@@ -554,10 +554,10 @@ textarea:focus {
 }
 
 .staff-tile {
-  min-height: 142px;
+  min-height: 112px;
   display: grid;
-  align-content: space-between;
-  gap: 12px;
+  align-content: end;
+  gap: 8px;
   padding: 14px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
@@ -576,16 +576,8 @@ textarea:focus {
     rgba(0, 0, 0, 0.5);
 }
 
-.staff-tile span {
-  color: var(--gold);
-  font-size: 0.72rem;
-  font-weight: 950;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
 .staff-tile strong {
-  min-height: 1.9em;
+  min-height: 0;
   display: flex;
   align-items: flex-end;
   font-size: clamp(1.35rem, 3vw, 2rem);
@@ -634,26 +626,53 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .staff-page {
+    width: min(100% - 24px, 1180px);
+    padding: 14px 0;
+    gap: 12px;
+  }
+
+  .staff-hero {
+    padding: 0;
+  }
+
+  .staff-hero .intro h1 {
+    font-size: clamp(2.4rem, 13vw, 4.1rem);
+  }
+
+  .staff-hero .intro p:last-child {
+    margin-top: 8px;
+    font-size: 0.98rem;
+    line-height: 1.45;
+  }
+
+  .staff-section {
+    gap: 8px;
+  }
+
+  .section-heading {
+    gap: 2px;
+  }
+
+  .section-heading h2 {
+    font-size: clamp(1.18rem, 7vw, 1.6rem);
+  }
+
   .staff-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 8px;
   }
 
   .staff-tile {
-    min-height: 104px;
-    gap: 8px;
-    padding: 11px;
-  }
-
-  .staff-tile span {
-    font-size: 0.62rem;
-    letter-spacing: 0.08em;
+    min-height: 74px;
+    gap: 0;
+    padding: 10px;
   }
 
   .staff-tile strong {
-    min-height: 2.1em;
-    font-size: clamp(1rem, 5vw, 1.28rem);
-    line-height: 1;
+    min-height: 0;
+    font-size: clamp(0.98rem, 5vw, 1.2rem);
+    line-height: 1.02;
   }
 
   .intro h1 {
