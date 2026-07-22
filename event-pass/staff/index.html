@@ -15,7 +15,7 @@
           <span>Staff scanner home</span>
         </a>
         <div class="topbar-actions">
-          <a class="sheet-link" href="../signup/">Customer signup</a>
+          <a class="sheet-link" href="../range-to-patio-party/">Customer signup</a>
         </div>
       </header>
 
@@ -89,8 +89,10 @@
     <script src="../config.js"></script>
     <script>
       (function () {
-        const eventKey = window.LEA_EVENT_CONFIG && window.LEA_EVENT_CONFIG.eventKey;
-        if (!eventKey || eventKey === "event-main") return;
+        const params = new URLSearchParams(window.location.search);
+        const configuredEventKey = window.LEA_EVENT_CONFIG && window.LEA_EVENT_CONFIG.eventKey;
+        const eventKey = params.get("event") || (configuredEventKey !== "event-main" ? configuredEventKey : "range-to-patio-party");
+        if (!eventKey) return;
         document.querySelectorAll("a[href]").forEach((link) => {
           const url = new URL(link.getAttribute("href"), window.location.href);
           if (url.origin === window.location.origin) url.searchParams.set("event", eventKey);

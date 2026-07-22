@@ -18,6 +18,11 @@
   const sheetLink = document.querySelector("#sheetLink");
   const stationButtons = Array.from(document.querySelectorAll("[data-station-option]"));
 
+  const stationEventKey = window.LEAEvent.getParam("event") || window.LEA_STAFF_EVENT_KEY || "range-to-patio-party";
+  if (stationEventKey && window.LEAEvent.config) {
+    window.LEAEvent.config.eventKey = stationEventKey;
+  }
+
   let stationId = window.LEAEvent.getParam("station") || window.LEA_STATION_ID || "range";
   let stream;
   let scanning = false;
