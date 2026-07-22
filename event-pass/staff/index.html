@@ -72,7 +72,7 @@
       (function () {
         const params = new URLSearchParams(window.location.search);
         const configuredEventKey = window.LEA_EVENT_CONFIG && window.LEA_EVENT_CONFIG.eventKey;
-        const eventKey = params.get("event") || (configuredEventKey !== "event-main" ? configuredEventKey : "range-to-patio-party");
+        const eventKey = params.get("event") || configuredEventKey || "range-to-patio-party";
         if (!eventKey) return;
         document.querySelectorAll("a[href]").forEach((link) => {
           const url = new URL(link.getAttribute("href"), window.location.href);

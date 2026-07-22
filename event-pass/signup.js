@@ -25,7 +25,7 @@
     data.action = "signup";
     data.marketingConsent = document.querySelector("#marketingConsent").checked;
     data.signupSource = "Event signup page";
-    data.eventKey = window.LEAEvent.config.eventKey || "event-main";
+    data.eventKey = window.LEAEvent.config.eventKey || "range-to-patio-party";
 
     submit.disabled = true;
     setStatus("Creating pass...", "");

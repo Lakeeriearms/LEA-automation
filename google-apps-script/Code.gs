@@ -4,9 +4,9 @@ const DATA_START_ROW = 5;
 
 const EVENTS = {
   "event-main": {
-    key: "event-main",
-    name: "Lake Erie Arms Event Punch Card",
-    sheetName: "Event - Main",
+    key: "range-to-patio-party",
+    name: "Range to Patio Party",
+    sheetName: "Range to Patio Party - Aug 8-9",
   },
   "range-to-patio-party": {
     key: "range-to-patio-party",
@@ -485,7 +485,7 @@ function findEventRow_(sheet, guestId) {
 }
 
 function getEvent_(eventKey) {
-  const key = clean_(eventKey) || "event-main";
+  const key = clean_(eventKey) || "range-to-patio-party";
   const event = EVENTS[key];
 
   if (!event) {

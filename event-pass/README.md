@@ -5,7 +5,7 @@ This folder contains the customer signup/pass flow and employee station scanner 
 ## Public URLs
 
 - `/event-pass/` - event chooser
-- `/event-pass/signup/` - active event customer signup
+- `/event-pass/signup/` - Range to Patio Party customer signup
 - `/event-pass/range-to-patio-party/` - Range to Patio Party signup
 - `/event-pass/staff/` - staff scanner home page
 - `/event-pass/pass/?id=GUEST_CODE` - customer QR pass for screenshotting
@@ -29,8 +29,7 @@ https://docs.google.com/spreadsheets/d/1XAj47kCYJ7MMK4WcsLmGhCyLbRzbMDgfMYw7RKPO
 Admin tracking:
 
 - Dashboard counts people signed up, location punches, total punches, raffle entries, and remaining codes.
-- The active event tab is `Event - Main`.
-- Range to Patio Party uses the `Range to Patio Party - Aug 8-9` event tab.
+- The active event tab is `Range to Patio Party - Aug 8-9`.
 - Future event tabs should start from `Event Template`.
 - The dashboard countdown assumes a 100,000-code event capacity.
 - The backend reads and writes the active event tab directly; older `Guests`, `Punches`, `Stations`, `Raffle Summary`, and `Setup Notes` tabs are hidden legacy tabs.
