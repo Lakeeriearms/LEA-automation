@@ -14,7 +14,6 @@
   const resultName = document.querySelector("#resultName");
   const resultGuestId = document.querySelector("#resultGuestId");
   const resultDetail = document.querySelector("#resultDetail");
-  const sheetLink = document.querySelector("#sheetLink");
   const stationButtons = Array.from(document.querySelectorAll("[data-station-option]"));
 
   const stationEventKey = window.LEAEvent.getParam("event") || window.LEA_STAFF_EVENT_KEY || "range-to-patio-party";
@@ -26,10 +25,6 @@
   let stream;
   let scanning = false;
   let detectedGuestId = "";
-
-  if (sheetLink) {
-    sheetLink.href = window.LEAEvent.config.spreadsheetUrl;
-  }
 
   function station() {
     return window.LEAEvent.getStation(stationId);
