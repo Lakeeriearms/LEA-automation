@@ -484,6 +484,15 @@ textarea:focus {
   letter-spacing: 0.04em;
 }
 
+.scan-feedback .scan-another {
+  min-width: 180px;
+  margin-top: 12px;
+  justify-self: center;
+  background: #fff;
+  color: #0f5c3b;
+  pointer-events: auto;
+}
+
 .camera-toggle {
   width: 100%;
 }

@@ -9,6 +9,7 @@
   const cameraToggle = document.querySelector("#cameraToggle");
   const scanFeedback = document.querySelector("#scanFeedback");
   const scanFeedbackId = document.querySelector("#scanFeedbackId");
+  const scanAnotherButton = document.querySelector("#scanAnotherButton");
   const manualId = document.querySelector("#manualGuestId");
   const lookupButton = document.querySelector("#lookupButton");
   const confirmButton = document.querySelector("#confirmButton");
@@ -30,10 +31,9 @@
   let cameraStarting = false;
   let scanning = false;
   let scanLoopToken = 0;
+  let scanNextFrame;
   let detectedGuestId = "";
   let lastScannedGuestId = "";
-  let lastScannedAt = 0;
-  let feedbackTimer;
 
   function station() {
     return window.LEAEvent.getStation(stationId);
@@ -67,19 +67,14 @@
   }
 
   function showScanFeedback(guestId) {
-    window.clearTimeout(feedbackTimer);
     reader.classList.add("is-scanned");
     scanFeedbackId.textContent = guestId;
     scanFeedback.classList.remove("hide");
+    scanAnotherButton.disabled = true;
 
     if (navigator.vibrate) {
       navigator.vibrate([120, 60, 120]);
     }
-
-    feedbackTimer = window.setTimeout(() => {
-      reader.classList.remove("is-scanned");
-      scanFeedback.classList.add("hide");
-    }, 2400);
   }
 
   async function lookupGuest(value, options) {
@@ -262,7 +257,6 @@
   function stopCamera(message) {
     scanning = false;
     scanLoopToken += 1;
-    window.clearTimeout(feedbackTimer);
     reader.classList.remove("is-scanned");
     scanFeedback.classList.add("hide");
 
@@ -322,22 +316,15 @@
         if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
           const rawValue = await readQrCode();
           const guestId = normalizeGuestId(rawValue);
-          const now = Date.now();
-          const isRecentDuplicate = guestId === lastScannedGuestId && now - lastScannedAt < 6000;
 
-          if (guestId && !isRecentDuplicate) {
+          if (!guestId) {
+            lastScannedGuestId = "";
+          } else if (guestId !== lastScannedGuestId) {
             scanning = false;
             lastScannedGuestId = guestId;
-            lastScannedAt = now;
             showScanFeedback(guestId);
             await lookupGuest(guestId, { fromScan: true });
-            window.setTimeout(() => {
-              if (!stream || loopToken !== scanLoopToken) {
-                return;
-              }
-              scanning = true;
-              tick();
-            }, 2600);
+            scanAnotherButton.disabled = false;
             return;
           }
         }
@@ -345,6 +332,7 @@
         window.requestAnimationFrame(tick);
       };
 
+      scanNextFrame = tick;
       tick();
     } catch (error) {
       stopCamera(
@@ -365,6 +353,28 @@
 
   lookupButton.addEventListener("click", () => lookupGuest(manualId.value));
   confirmButton.addEventListener("click", confirmPunch);
+  scanAnotherButton.addEventListener("click", () => {
+    reader.classList.remove("is-scanned");
+    scanFeedback.classList.add("hide");
+    scanAnotherButton.disabled = true;
+    detectedGuestId = "";
+    manualId.value = "";
+    purchaseAmount.value = "";
+    result.classList.add("hide");
+    resultName.textContent = "";
+    resultGuestId.textContent = "";
+    resultDetail.textContent = "";
+    confirmButton.disabled = true;
+    status.textContent = "";
+    status.className = "status";
+
+    if (stream && scanNextFrame) {
+      scanning = true;
+      window.requestAnimationFrame(scanNextFrame);
+    } else {
+      startCamera();
+    }
+  });
   cameraToggle.addEventListener("click", () => {
     if (stream || cameraStarting) {
       stopCamera();
