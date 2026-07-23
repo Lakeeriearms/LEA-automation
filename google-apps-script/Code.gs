@@ -30,6 +30,7 @@ const EVENT_HEADERS = [
   "Phone",
   "City",
   "State",
+  "Total Spend",
   "Member / Membership",
   "LEA Range",
   "LUL Immersion Zone",
@@ -53,25 +54,25 @@ const EVENT_HEADERS = [
 ];
 
 const EVENT_PUNCH_COLUMNS = {
-  member: 8,
-  range: 9,
-  "level-up-live-immersion-zone": 10,
-  "level-up-live-action-zone": 11,
-  retail: 12,
-  "lea-cafe": 13,
-  "caliber-club": 14,
-  photobooth: 15,
+  member: 9,
+  range: 10,
+  "level-up-live-immersion-zone": 11,
+  "level-up-live-action-zone": 12,
+  retail: 13,
+  "lea-cafe": 14,
+  "caliber-club": 15,
+  photobooth: 16,
 };
 
 const EVENT_PURCHASE_COLUMNS = {
-  member: 20,
-  range: 21,
-  "level-up-live-immersion-zone": 22,
-  "level-up-live-action-zone": 23,
-  retail: 24,
-  "lea-cafe": 25,
-  "caliber-club": 26,
-  photobooth: 27,
+  member: 21,
+  range: 22,
+  "level-up-live-immersion-zone": 23,
+  "level-up-live-action-zone": 24,
+  retail: 25,
+  "lea-cafe": 26,
+  "caliber-club": 27,
+  photobooth: 28,
 };
 
 const STATIONS = {
@@ -361,7 +362,7 @@ function findEventGuest_(guestId, event) {
     phone: values[4],
     city: values[5],
     state: values[6],
-    memberStatus: values[18] || (values[7] === true ? "Member" : "Non member"),
+    memberStatus: values[19] || (values[8] === true ? "Member" : "Non member"),
   };
 }
 
@@ -389,9 +390,10 @@ function ensureEventSheet_(event) {
   sheet.setFrozenRows(HEADER_ROW);
 
   const dataRowCount = Math.max(1, sheet.getMaxRows() - DATA_START_ROW + 1);
-  const checkboxRange = sheet.getRange(DATA_START_ROW, 8, dataRowCount, 8);
+  sheet.getRange(DATA_START_ROW, 8, dataRowCount, 1).setNumberFormat("$#,##0.00");
+  const checkboxRange = sheet.getRange(DATA_START_ROW, 9, dataRowCount, 8);
   checkboxRange.insertCheckboxes();
-  sheet.getRange(DATA_START_ROW, 20, dataRowCount, 8).setNumberFormat("$#,##0.00");
+  sheet.getRange(DATA_START_ROW, 21, dataRowCount, 8).setNumberFormat("$#,##0.00");
 }
 
 function appendEventSignup_(guest, event) {
@@ -407,6 +409,7 @@ function appendEventSignup_(guest, event) {
     guest.phone,
     guest.city,
     guest.state,
+    "=IF(A" + formulaRow + "=\"\",\"\",SUM(U" + formulaRow + ":AB" + formulaRow + "))",
     guest.memberStatus === "Member",
     false,
     false,
@@ -415,8 +418,8 @@ function appendEventSignup_(guest, event) {
     false,
     false,
     false,
-    "=IF(A" + formulaRow + "=\"\",\"\",COUNTIF(H" + formulaRow + ":O" + formulaRow + ",TRUE))",
-    "=IF(A" + formulaRow + "=\"\",\"\",P" + formulaRow + "+IF(P" + formulaRow + "=8,25,0)+ROUNDDOWN(SUM(T" + formulaRow + ":AA" + formulaRow + ")/10,0))",
+    "=IF(A" + formulaRow + "=\"\",\"\",COUNTIF(I" + formulaRow + ":P" + formulaRow + ",TRUE))",
+    "=IF(A" + formulaRow + "=\"\",\"\",Q" + formulaRow + "+IF(Q" + formulaRow + "=8,25,0)+ROUNDDOWN(H" + formulaRow + "/10,0))",
     guest.updatedAt,
     guest.memberStatus,
     0,
@@ -460,7 +463,7 @@ function markEventPunch_(guestId, stationId, purchaseAmount, updatedAt, event) {
 
   sheet.getRange(row, column).setValue(true);
   writeEventPurchaseAmount_(sheet, row, stationId, purchaseAmount);
-  sheet.getRange(row, 18).setValue(updatedAt);
+  sheet.getRange(row, 19).setValue(updatedAt);
 
   return getEventEntryTotals_(guestId, event);
 }
@@ -474,7 +477,7 @@ function markEventPurchase_(guestId, stationId, purchaseAmount, updatedAt, event
   }
 
   writeEventPurchaseAmount_(sheet, row, stationId, purchaseAmount);
-  sheet.getRange(row, 18).setValue(updatedAt);
+  sheet.getRange(row, 19).setValue(updatedAt);
 
   return getEventEntryTotals_(guestId, event);
 }
@@ -502,9 +505,9 @@ function getEventEntryTotals_(guestId, event) {
     };
   }
 
-  const checks = sheet.getRange(row, 8, 1, 8).getValues()[0];
+  const checks = sheet.getRange(row, 9, 1, 8).getValues()[0];
   const totalPunches = checks.filter(function (value) { return value === true; }).length;
-  const amounts = sheet.getRange(row, 20, 1, 8).getValues()[0];
+  const amounts = sheet.getRange(row, 21, 1, 8).getValues()[0];
   const purchaseTotal = amounts.reduce(function (sum, value) {
     return sum + Math.max(0, Number(value || 0));
   }, 0);
@@ -556,11 +559,11 @@ function getEventPunches_(guestId, event) {
     return [];
   }
 
-  const checks = sheet.getRange(row, 8, 1, 8).getValues()[0];
+  const checks = sheet.getRange(row, 9, 1, 8).getValues()[0];
   return stationList_()
     .filter(function (station) {
       const column = EVENT_PUNCH_COLUMNS[station.id];
-      return column && checks[column - 8] === true;
+      return column && checks[column - 9] === true;
     })
     .map(function (station) {
       return {
