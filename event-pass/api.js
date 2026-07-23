@@ -17,7 +17,7 @@
       checklistItem: "Shoot at the Range",
       baseEntries: 1,
       purchaseBonusEntries: 0,
-      allowsPurchase: false,
+      allowsPurchase: true,
     },
     "level-up-live-immersion-zone": {
       id: "level-up-live-immersion-zone",
@@ -25,7 +25,7 @@
       checklistItem: "Play in the Immersive Zone",
       baseEntries: 1,
       purchaseBonusEntries: 0,
-      allowsPurchase: false,
+      allowsPurchase: true,
     },
     "level-up-live-action-zone": {
       id: "level-up-live-action-zone",
@@ -33,14 +33,14 @@
       checklistItem: "Play in the Action Zone",
       baseEntries: 1,
       purchaseBonusEntries: 0,
-      allowsPurchase: false,
+      allowsPurchase: true,
     },
     retail: {
       id: "retail",
       name: "Retail",
       checklistItem: "Make Purchase at Retail",
       baseEntries: 1,
-      purchaseBonusEntries: 1,
+      purchaseBonusEntries: 0,
       allowsPurchase: true,
     },
     "lea-cafe": {
@@ -48,7 +48,7 @@
       name: "LEA Cafe",
       checklistItem: "Make Purchase at LEA Cafe",
       baseEntries: 1,
-      purchaseBonusEntries: 1,
+      purchaseBonusEntries: 0,
       allowsPurchase: true,
     },
     "caliber-club": {
@@ -56,7 +56,7 @@
       name: "Caliber Club",
       checklistItem: "Make Purchase at Caliber Club",
       baseEntries: 1,
-      purchaseBonusEntries: 1,
+      purchaseBonusEntries: 0,
       allowsPurchase: true,
     },
     photobooth: {
@@ -65,7 +65,7 @@
       checklistItem: "Take photo in booth & post/tag us",
       baseEntries: 1,
       purchaseBonusEntries: 0,
-      allowsPurchase: false,
+      allowsPurchase: true,
     },
   };
 
@@ -79,6 +79,21 @@
 
   function writeMock(data) {
     localStorage.setItem(storageKey, JSON.stringify(data));
+  }
+
+  function getMockTotals(data, guestId) {
+    const guestPunches = data.punches.filter((item) => item.guestId === guestId);
+    const totalPunches = new Set(guestPunches.map((item) => item.stationId)).size;
+    const purchaseTotal = guestPunches.reduce((sum, item) => sum + Math.max(0, Number(item.purchaseAmount || 0)), 0);
+    const purchaseEntries = Math.floor(purchaseTotal / 10);
+    const completionBonus = totalPunches === Object.keys(stations).length ? 25 : 0;
+
+    return {
+      totalPunches,
+      purchaseTotal,
+      purchaseEntries,
+      entries: totalPunches + completionBonus + purchaseEntries,
+    };
   }
 
   function createGuestId() {
@@ -138,11 +153,33 @@
         return Promise.resolve({ ok: false, error: `Unknown station: ${payload.stationId}`, mock: true });
       }
 
+      const purchaseAmount = Math.max(0, Number(payload.purchaseAmount || 0));
       const duplicate = data.punches.find(
         (item) => item.guestId === payload.guestId && item.stationId === payload.stationId,
       );
 
       if (duplicate) {
+        if (purchaseAmount > 0) {
+          duplicate.purchaseAmount = purchaseAmount;
+          writeMock(data);
+          const totals = getMockTotals(data, payload.guestId);
+          return Promise.resolve({
+            ok: true,
+            duplicate: true,
+            message: `Already punched for ${station.name}. Purchase amount updated.`,
+            guest,
+            station,
+            existingPunch: duplicate,
+            punch: {
+              purchaseAmount,
+              entries: totals.entries,
+              activityEntries: totals.totalPunches,
+              purchaseEntries: totals.purchaseEntries,
+            },
+            mock: true,
+          });
+        }
+
         return Promise.resolve({
           ok: true,
           duplicate: true,
@@ -153,8 +190,6 @@
           mock: true,
         });
       }
-
-      const purchaseAmount = Math.max(0, Number(payload.purchaseAmount || 0));
       const punch = {
         timestamp: new Date().toISOString(),
         guestId: payload.guestId,
@@ -162,10 +197,13 @@
         stationName: station.name,
         staffName: payload.staffName || "",
         purchaseAmount,
-        entries: station.baseEntries + (purchaseAmount > 0 ? station.purchaseBonusEntries : 0),
         scanId: `MOCK-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
       };
       data.punches.push(punch);
+      const totals = getMockTotals(data, payload.guestId);
+      punch.entries = totals.entries;
+      punch.activityEntries = totals.totalPunches;
+      punch.purchaseEntries = totals.purchaseEntries;
       writeMock(data);
       return Promise.resolve({
         ok: true,

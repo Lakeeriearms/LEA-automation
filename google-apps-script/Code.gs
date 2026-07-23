@@ -42,6 +42,14 @@ const EVENT_HEADERS = [
   "Raffle Entries",
   "Last Updated",
   "Membership Status",
+  "Member Amount",
+  "Range Amount",
+  "Immersion Amount",
+  "Action Zone Amount",
+  "Retail Amount",
+  "LEA Cafe Amount",
+  "Caliber Club Amount",
+  "Photobooth Amount",
 ];
 
 const EVENT_PUNCH_COLUMNS = {
@@ -53,6 +61,17 @@ const EVENT_PUNCH_COLUMNS = {
   "lea-cafe": 13,
   "caliber-club": 14,
   photobooth: 15,
+};
+
+const EVENT_PURCHASE_COLUMNS = {
+  member: 20,
+  range: 21,
+  "level-up-live-immersion-zone": 22,
+  "level-up-live-action-zone": 23,
+  retail: 24,
+  "lea-cafe": 25,
+  "caliber-club": 26,
+  photobooth: 27,
 };
 
 const STATIONS = {
@@ -70,7 +89,7 @@ const STATIONS = {
     checklistItem: "Shoot at the Range",
     baseEntries: 1,
     purchaseBonusEntries: 0,
-    allowsPurchase: false,
+    allowsPurchase: true,
   },
   "level-up-live-immersion-zone": {
     id: "level-up-live-immersion-zone",
@@ -78,7 +97,7 @@ const STATIONS = {
     checklistItem: "Play in the Immersive Zone",
     baseEntries: 1,
     purchaseBonusEntries: 0,
-    allowsPurchase: false,
+    allowsPurchase: true,
   },
   "level-up-live-action-zone": {
     id: "level-up-live-action-zone",
@@ -86,14 +105,14 @@ const STATIONS = {
     checklistItem: "Play in the Action Zone",
     baseEntries: 1,
     purchaseBonusEntries: 0,
-    allowsPurchase: false,
+    allowsPurchase: true,
   },
   retail: {
     id: "retail",
     name: "Retail",
     checklistItem: "Make Purchase at Retail",
     baseEntries: 1,
-    purchaseBonusEntries: 1,
+    purchaseBonusEntries: 0,
     allowsPurchase: true,
   },
   "lea-cafe": {
@@ -101,7 +120,7 @@ const STATIONS = {
     name: "LEA Cafe",
     checklistItem: "Make Purchase at LEA Cafe",
     baseEntries: 1,
-    purchaseBonusEntries: 1,
+    purchaseBonusEntries: 0,
     allowsPurchase: true,
   },
   "caliber-club": {
@@ -109,7 +128,7 @@ const STATIONS = {
     name: "Caliber Club",
     checklistItem: "Make Purchase at Caliber Club",
     baseEntries: 1,
-    purchaseBonusEntries: 1,
+    purchaseBonusEntries: 0,
     allowsPurchase: true,
   },
   photobooth: {
@@ -118,7 +137,7 @@ const STATIONS = {
     checklistItem: "Take photo in booth & post/tag us",
     baseEntries: 1,
     purchaseBonusEntries: 0,
-    allowsPurchase: false,
+    allowsPurchase: true,
   },
 };
 
@@ -232,8 +251,30 @@ function scan_(payload, event) {
     throw new Error("Guest not found: " + guestId);
   }
 
+  const purchaseAmount = Math.max(0, Number(payload.purchaseAmount || 0));
   const existingPunch = findEventPunch_(guestId, stationId, event);
+  const now = new Date();
+
   if (existingPunch) {
+    if (purchaseAmount > 0) {
+      const totals = markEventPurchase_(guestId, station.id, purchaseAmount, now, event);
+      return {
+        ok: true,
+        duplicate: true,
+        message: "Already punched for " + station.name + ". Purchase amount updated.",
+        guest,
+        station,
+        existingPunch,
+        punch: {
+          timestamp: now.toISOString(),
+          purchaseAmount,
+          entries: totals.raffleEntries,
+          activityEntries: totals.totalPunches,
+          purchaseEntries: totals.purchaseEntries,
+        },
+      };
+    }
+
     return {
       ok: true,
       duplicate: true,
@@ -244,11 +285,8 @@ function scan_(payload, event) {
     };
   }
 
-  const purchaseAmount = Math.max(0, Number(payload.purchaseAmount || 0));
-  const now = new Date();
   const scanId = "SCAN-" + Utilities.getUuid().slice(0, 8).toUpperCase();
-
-  const updatedPunches = markEventPunch_(guestId, station.id, now, event);
+  const totals = markEventPunch_(guestId, station.id, purchaseAmount, now, event);
 
   return {
     ok: true,
@@ -259,7 +297,9 @@ function scan_(payload, event) {
     punch: {
       timestamp: now.toISOString(),
       purchaseAmount,
-      entries: updatedPunches,
+      entries: totals.raffleEntries,
+      activityEntries: totals.totalPunches,
+      purchaseEntries: totals.purchaseEntries,
       scanId,
     },
   };
@@ -338,22 +378,20 @@ function getSheet_(sheetName) {
 
 function ensureEventSheet_(event) {
   const sheet = getSheet_(event.sheetName);
+
+  if (sheet.getMaxColumns() < EVENT_HEADERS.length) {
+    sheet.insertColumnsAfter(sheet.getMaxColumns(), EVENT_HEADERS.length - sheet.getMaxColumns());
+  }
+
   const headerRange = sheet.getRange(HEADER_ROW, 1, 1, EVENT_HEADERS.length);
+  headerRange.setValues([EVENT_HEADERS]);
+  headerRange.setFontWeight("bold");
+  sheet.setFrozenRows(HEADER_ROW);
 
-  if (headerRange.getValues()[0].every(function (value) { return value === ""; })) {
-    headerRange.setValues([EVENT_HEADERS]);
-    headerRange.setFontWeight("bold");
-    sheet.setFrozenRows(HEADER_ROW);
-  }
-
-  const membershipStatusHeader = sheet.getRange(HEADER_ROW, 19);
-  if (!membershipStatusHeader.getValue()) {
-    membershipStatusHeader.setValue("Membership Status");
-    membershipStatusHeader.setFontWeight("bold");
-  }
-
-  const checkboxRange = sheet.getRange(DATA_START_ROW, 8, Math.max(1, sheet.getMaxRows() - DATA_START_ROW + 1), 8);
+  const dataRowCount = Math.max(1, sheet.getMaxRows() - DATA_START_ROW + 1);
+  const checkboxRange = sheet.getRange(DATA_START_ROW, 8, dataRowCount, 8);
   checkboxRange.insertCheckboxes();
+  sheet.getRange(DATA_START_ROW, 20, dataRowCount, 8).setNumberFormat("$#,##0.00");
 }
 
 function appendEventSignup_(guest, event) {
@@ -377,10 +415,18 @@ function appendEventSignup_(guest, event) {
     false,
     false,
     false,
-    "=COUNTIF(H" + formulaRow + ":O" + formulaRow + ",TRUE)",
-    "=P" + formulaRow + "+IF(P" + formulaRow + "=8,25,0)",
+    "=IF(A" + formulaRow + "=\"\",\"\",COUNTIF(H" + formulaRow + ":O" + formulaRow + ",TRUE))",
+    "=IF(A" + formulaRow + "=\"\",\"\",P" + formulaRow + "+IF(P" + formulaRow + "=8,25,0)+ROUNDDOWN(SUM(T" + formulaRow + ":AA" + formulaRow + ")/10,0))",
     guest.updatedAt,
     guest.memberStatus,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
   ]]);
 }
 
@@ -398,11 +444,11 @@ function findNextEventRow_(sheet) {
   return maxRows + 1;
 }
 
-function markEventPunch_(guestId, stationId, updatedAt, event) {
+function markEventPunch_(guestId, stationId, purchaseAmount, updatedAt, event) {
   const column = EVENT_PUNCH_COLUMNS[stationId];
 
   if (!column) {
-    return;
+    return getEventEntryTotals_(guestId, event);
   }
 
   const sheet = getSheet_(event.sheetName);
@@ -413,9 +459,65 @@ function markEventPunch_(guestId, stationId, updatedAt, event) {
   }
 
   sheet.getRange(row, column).setValue(true);
+  writeEventPurchaseAmount_(sheet, row, stationId, purchaseAmount);
   sheet.getRange(row, 18).setValue(updatedAt);
 
-  return getEventPunches_(guestId, event).length;
+  return getEventEntryTotals_(guestId, event);
+}
+
+function markEventPurchase_(guestId, stationId, purchaseAmount, updatedAt, event) {
+  const sheet = getSheet_(event.sheetName);
+  const row = findEventRow_(sheet, guestId);
+
+  if (!row) {
+    throw new Error("Guest not found: " + guestId);
+  }
+
+  writeEventPurchaseAmount_(sheet, row, stationId, purchaseAmount);
+  sheet.getRange(row, 18).setValue(updatedAt);
+
+  return getEventEntryTotals_(guestId, event);
+}
+
+function writeEventPurchaseAmount_(sheet, row, stationId, purchaseAmount) {
+  const column = EVENT_PURCHASE_COLUMNS[stationId];
+
+  if (!column) {
+    return;
+  }
+
+  sheet.getRange(row, column).setValue(Math.max(0, Number(purchaseAmount || 0)));
+}
+
+function getEventEntryTotals_(guestId, event) {
+  const sheet = getSheet_(event.sheetName);
+  const row = findEventRow_(sheet, guestId);
+
+  if (!row) {
+    return {
+      totalPunches: 0,
+      purchaseTotal: 0,
+      purchaseEntries: 0,
+      raffleEntries: 0,
+    };
+  }
+
+  const checks = sheet.getRange(row, 8, 1, 8).getValues()[0];
+  const totalPunches = checks.filter(function (value) { return value === true; }).length;
+  const amounts = sheet.getRange(row, 20, 1, 8).getValues()[0];
+  const purchaseTotal = amounts.reduce(function (sum, value) {
+    return sum + Math.max(0, Number(value || 0));
+  }, 0);
+  const purchaseEntries = Math.floor(purchaseTotal / 10);
+  const completionBonus = totalPunches === 8 ? 25 : 0;
+  const raffleEntries = totalPunches + completionBonus + purchaseEntries;
+
+  return {
+    totalPunches,
+    purchaseTotal,
+    purchaseEntries,
+    raffleEntries,
+  };
 }
 
 function findEventPunch_(guestId, stationId, event) {
@@ -436,11 +538,13 @@ function findEventPunch_(guestId, stationId, event) {
     return null;
   }
 
+  const totals = getEventEntryTotals_(guestId, event);
+
   return {
     guestId,
     stationId,
     stationName: STATIONS[stationId].name,
-    entries: sheet.getRange(row, 17).getValue() || 0,
+    entries: totals.raffleEntries,
   };
 }
 

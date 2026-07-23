@@ -46,7 +46,7 @@
     title.textContent = current.name;
     subtitle.textContent = "Scan a customer pass to check off this station in the raffle tracker.";
     checklist.textContent = current.checklistItem;
-    purchaseField.classList.toggle("hide", !current.allowsPurchase);
+    purchaseField.classList.remove("hide");
     stationButtons.forEach((button) => {
       button.classList.toggle("is-active", button.dataset.stationOption === stationId);
     });
@@ -110,13 +110,15 @@
     }
 
     if (response.duplicate) {
-      setStatus(response.message || "This station was already punched.", "bad");
-      resultDetail.textContent = "Duplicate blocked. No new raffle entry was added.";
+      setStatus(response.message || "This station was already punched.", response.punch ? "good" : "bad");
+      resultDetail.textContent = response.punch
+        ? `Total raffle entries: ${response.punch.entries}.`
+        : "Duplicate blocked. No new raffle entry was added.";
       return;
     }
 
     setStatus(response.message || "Punch recorded.", "good");
-    resultDetail.textContent = `${response.punch.entries} raffle entr${response.punch.entries === 1 ? "y" : "ies"} added.`;
+    resultDetail.textContent = `Total raffle entries: ${response.punch.entries}.`;
   }
 
   function loadQrFallback_() {
