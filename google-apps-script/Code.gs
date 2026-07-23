@@ -412,7 +412,7 @@ function appendEventSignup_(guest, event) {
     guest.city,
     guest.state,
     "=IF(A" + formulaRow + "=\"\",\"\",SUM(U" + formulaRow + ":AB" + formulaRow + "))",
-    guest.memberStatus === "Member",
+    guest.memberStatus !== "Non member",
     false,
     false,
     false,
@@ -641,6 +641,8 @@ function normalizeMembershipStatus_(value) {
     gold: "Gold",
     platinum: "Platinum",
     charter: "Charter",
+    "caliber-member": "Caliber member",
+    "caliber member": "Caliber member",
   };
 
   return allowed[status] || "Non member";

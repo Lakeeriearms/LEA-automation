@@ -8,7 +8,6 @@
   const manualId = document.querySelector("#manualGuestId");
   const lookupButton = document.querySelector("#lookupButton");
   const confirmButton = document.querySelector("#confirmButton");
-  const staffName = document.querySelector("#staffName");
   const purchaseAmount = document.querySelector("#purchaseAmount");
   const purchaseField = document.querySelector("#purchaseField");
   const result = document.querySelector("#scanResult");
@@ -99,7 +98,6 @@
       action: "scan",
       guestId: detectedGuestId,
       stationId,
-      staffName: staffName.value,
       purchaseAmount: purchaseAmount.value || 0,
     });
 

@@ -106,6 +106,20 @@
     return `LEA-${yy}${mm}${dd}-${rand}${extra}`;
   }
 
+  function normalizeMembershipStatus(value) {
+    const statuses = {
+      "non-member": "Non member",
+      "non member": "Non member",
+      brass: "Brass",
+      gold: "Gold",
+      platinum: "Platinum",
+      charter: "Charter",
+      "caliber-member": "Caliber member",
+      "caliber member": "Caliber member",
+    };
+    return statuses[String(value || "").trim().toLowerCase()] || "Non member";
+  }
+
   function mockRequest(payload) {
     const data = readMock();
     const action = payload.action;
@@ -119,7 +133,7 @@
         email: payload.email || "",
         city: payload.city || "",
         state: payload.state || "",
-        memberStatus: payload.memberStatus === "member" ? "Member" : "Guest",
+        memberStatus: normalizeMembershipStatus(payload.memberStatus),
         createdAt: new Date().toISOString(),
       };
       data.guests.push(guest);
@@ -195,7 +209,6 @@
         guestId: payload.guestId,
         stationId: station.id,
         stationName: station.name,
-        staffName: payload.staffName || "",
         purchaseAmount,
         scanId: `MOCK-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
       };
