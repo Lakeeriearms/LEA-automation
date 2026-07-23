@@ -241,7 +241,7 @@
       const timer = window.setTimeout(() => {
         cleanup();
         reject(new Error("The event tracker did not respond."));
-      }, 15000);
+      }, 45000);
 
       function cleanup() {
         window.clearTimeout(timer);

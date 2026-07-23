@@ -164,7 +164,6 @@ function doPost(event) {
 function route_(payload) {
   try {
     const event = getEvent_(payload.eventKey);
-    setupWorkbook_(event);
 
     switch (payload.action) {
       case "signup":
@@ -173,6 +172,9 @@ function route_(payload) {
         return scan_(payload, event);
       case "lookup":
         return lookup_(payload, event);
+      case "setup":
+        setupWorkbook_(event);
+        return { ok: true, eventName: event.name, message: "Workbook setup complete." };
       case "stations":
         return { ok: true, eventName: event.name, stations: stationList_() };
       default:
