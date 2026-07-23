@@ -34,6 +34,7 @@
   let scanNextFrame;
   let detectedGuestId = "";
   let lastScannedGuestId = "";
+  let lookupToken = 0;
 
   function station() {
     return window.LEAEvent.getStation(stationId);
@@ -70,7 +71,14 @@
     reader.classList.add("is-scanned");
     scanFeedbackId.textContent = guestId;
     scanFeedback.classList.remove("hide");
-    scanAnotherButton.disabled = true;
+    scanAnotherButton.disabled = false;
+
+    video.pause();
+    if (stream) {
+      stream.getVideoTracks().forEach((track) => {
+        track.enabled = false;
+      });
+    }
 
     if (navigator.vibrate) {
       navigator.vibrate([120, 60, 120]);
@@ -80,6 +88,7 @@
   async function lookupGuest(value, options) {
     const guestId = normalizeGuestId(value);
     const fromScan = options && options.fromScan;
+    const currentLookupToken = ++lookupToken;
 
     if (!guestId) {
       setStatus("Scan or type a Guest ID first.", "bad");
@@ -95,9 +104,16 @@
     try {
       response = await window.LEAEvent.request({ action: "lookup", guestId });
     } catch (error) {
+      if (currentLookupToken !== lookupToken) {
+        return;
+      }
       result.classList.add("hide");
       confirmButton.disabled = true;
       setStatus(error.message || "Unable to look up this guest. Try again.", "bad");
+      return;
+    }
+
+    if (currentLookupToken !== lookupToken) {
       return;
     }
 
@@ -324,7 +340,6 @@
             lastScannedGuestId = guestId;
             showScanFeedback(guestId);
             await lookupGuest(guestId, { fromScan: true });
-            scanAnotherButton.disabled = false;
             return;
           }
         }
@@ -353,7 +368,8 @@
 
   lookupButton.addEventListener("click", () => lookupGuest(manualId.value));
   confirmButton.addEventListener("click", confirmPunch);
-  scanAnotherButton.addEventListener("click", () => {
+  scanAnotherButton.addEventListener("click", async () => {
+    lookupToken += 1;
     reader.classList.remove("is-scanned");
     scanFeedback.classList.add("hide");
     scanAnotherButton.disabled = true;
@@ -369,6 +385,10 @@
     status.className = "status";
 
     if (stream && scanNextFrame) {
+      stream.getVideoTracks().forEach((track) => {
+        track.enabled = true;
+      });
+      await video.play().catch(() => {});
       scanning = true;
       window.requestAnimationFrame(scanNextFrame);
     } else {

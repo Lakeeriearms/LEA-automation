@@ -399,9 +399,29 @@ textarea:focus {
   content: "";
   width: 18px;
   height: 18px;
+  display: grid;
+  place-items: center;
   border: 2px solid rgba(0, 0, 0, 0.32);
   border-radius: 50%;
   flex: 0 0 auto;
+}
+
+.checklist li.is-complete {
+  background: rgba(39, 112, 79, 0.14);
+  color: #1f5f46;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.checklist li.is-complete::before {
+  content: "\2713";
+  border-color: var(--green);
+  background: var(--green);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 950;
+  line-height: 1;
+  text-decoration: none;
 }
 
 .scanner-shell {
