@@ -3,8 +3,12 @@
   const subtitle = document.querySelector("#stationSubtitle");
   const checklist = document.querySelector("#stationChecklist");
   const status = document.querySelector("#scanStatus");
+  const reader = document.querySelector("#reader");
   const video = document.querySelector("#readerVideo");
   const placeholder = document.querySelector("#readerPlaceholder");
+  const cameraToggle = document.querySelector("#cameraToggle");
+  const scanFeedback = document.querySelector("#scanFeedback");
+  const scanFeedbackId = document.querySelector("#scanFeedbackId");
   const manualId = document.querySelector("#manualGuestId");
   const lookupButton = document.querySelector("#lookupButton");
   const confirmButton = document.querySelector("#confirmButton");
@@ -23,8 +27,13 @@
 
   let stationId = window.LEAEvent.getParam("station") || window.LEA_STATION_ID || "range";
   let stream;
+  let cameraStarting = false;
   let scanning = false;
+  let scanLoopToken = 0;
   let detectedGuestId = "";
+  let lastScannedGuestId = "";
+  let lastScannedAt = 0;
+  let feedbackTimer;
 
   function station() {
     return window.LEAEvent.getStation(stationId);
@@ -51,8 +60,31 @@
     return match ? match[0] : String(value || "").trim().toUpperCase();
   }
 
-  async function lookupGuest(value) {
+  function setCameraButton(isOn, label) {
+    cameraToggle.disabled = cameraStarting;
+    cameraToggle.textContent = label || (isOn ? "Turn camera off" : "Turn camera on");
+    cameraToggle.setAttribute("aria-pressed", isOn ? "true" : "false");
+  }
+
+  function showScanFeedback(guestId) {
+    window.clearTimeout(feedbackTimer);
+    reader.classList.add("is-scanned");
+    scanFeedbackId.textContent = guestId;
+    scanFeedback.classList.remove("hide");
+
+    if (navigator.vibrate) {
+      navigator.vibrate([120, 60, 120]);
+    }
+
+    feedbackTimer = window.setTimeout(() => {
+      reader.classList.remove("is-scanned");
+      scanFeedback.classList.add("hide");
+    }, 2400);
+  }
+
+  async function lookupGuest(value, options) {
     const guestId = normalizeGuestId(value);
+    const fromScan = options && options.fromScan;
 
     if (!guestId) {
       setStatus("Scan or type a Guest ID first.", "bad");
@@ -61,9 +93,18 @@
 
     detectedGuestId = guestId;
     manualId.value = guestId;
-    setStatus("Looking up guest...", "");
+    setStatus(fromScan ? "QR code scanned. Looking up guest..." : "Looking up guest...", fromScan ? "good" : "");
 
-    const response = await window.LEAEvent.request({ action: "lookup", guestId });
+    let response;
+
+    try {
+      response = await window.LEAEvent.request({ action: "lookup", guestId });
+    } catch (error) {
+      result.classList.add("hide");
+      confirmButton.disabled = true;
+      setStatus(error.message || "Unable to look up this guest. Try again.", "bad");
+      return;
+    }
 
     if (!response.ok) {
       result.classList.add("hide");
@@ -77,7 +118,12 @@
     resultGuestId.textContent = response.guest.guestId;
     resultDetail.textContent = `${response.punches.length} punches already recorded.`;
     confirmButton.disabled = false;
-    setStatus("Guest found. Confirm the punch when the activity is complete.", "good");
+    setStatus(
+      fromScan
+        ? "QR code scanned successfully. Guest found—confirm the punch when the activity is complete."
+        : "Guest found. Confirm the punch when the activity is complete.",
+      "good",
+    );
   }
 
   async function confirmPunch() {
@@ -177,37 +223,121 @@
     };
   }
 
+  async function requestCameraStream_() {
+    const attempts = [
+      {
+        video: {
+          facingMode: { exact: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      },
+      {
+        video: {
+          facingMode: { ideal: "environment" },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      },
+      { video: true, audio: false },
+    ];
+    let lastError;
+
+    for (const constraints of attempts) {
+      try {
+        return await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (error) {
+        lastError = error;
+        if (error && (error.name === "NotAllowedError" || error.name === "SecurityError")) {
+          throw error;
+        }
+      }
+    }
+
+    throw lastError || new Error("Unable to open a camera.");
+  }
+
+  function stopCamera(message) {
+    scanning = false;
+    scanLoopToken += 1;
+    window.clearTimeout(feedbackTimer);
+    reader.classList.remove("is-scanned");
+    scanFeedback.classList.add("hide");
+
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      stream = null;
+    }
+
+    video.pause();
+    video.srcObject = null;
+    video.classList.add("hide");
+    placeholder.textContent = message || "Camera is off. Turn it on to scan a QR code.";
+    placeholder.classList.remove("hide");
+    cameraStarting = false;
+    setCameraButton(false);
+  }
+
   async function startCamera() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      placeholder.textContent = "Camera access is not supported in this browser. Type the Guest ID below.";
+    if (cameraStarting || stream) {
       return;
     }
 
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      placeholder.textContent = "Camera access is not supported in this browser. Type the Guest ID below.";
+      setCameraButton(false);
+      return;
+    }
+
+    if (!window.isSecureContext) {
+      placeholder.textContent = "Camera access requires a secure HTTPS page. Type the Guest ID below.";
+      setCameraButton(false);
+      return;
+    }
+
+    cameraStarting = true;
+    setCameraButton(false, "Starting camera...");
+    placeholder.textContent = "Starting camera...";
+    placeholder.classList.remove("hide");
+
     try {
-      const readQrCode = await createQrReader_();
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { ideal: "environment" } },
-        audio: false,
-      });
+      stream = await requestCameraStream_();
       video.srcObject = stream;
+      await video.play();
       video.classList.remove("hide");
       placeholder.classList.add("hide");
+      const readQrCode = await createQrReader_();
+      cameraStarting = false;
+      setCameraButton(true);
       scanning = true;
+      const loopToken = ++scanLoopToken;
 
       const tick = async () => {
-        if (!scanning) {
+        if (!scanning || loopToken !== scanLoopToken) {
           return;
         }
 
         if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
           const rawValue = await readQrCode();
-          if (rawValue) {
+          const guestId = normalizeGuestId(rawValue);
+          const now = Date.now();
+          const isRecentDuplicate = guestId === lastScannedGuestId && now - lastScannedAt < 6000;
+
+          if (guestId && !isRecentDuplicate) {
             scanning = false;
-            await lookupGuest(rawValue);
+            lastScannedGuestId = guestId;
+            lastScannedAt = now;
+            showScanFeedback(guestId);
+            await lookupGuest(guestId, { fromScan: true });
             window.setTimeout(() => {
+              if (!stream || loopToken !== scanLoopToken) {
+                return;
+              }
               scanning = true;
               tick();
-            }, 1800);
+            }, 2600);
             return;
           }
         }
@@ -217,7 +347,11 @@
 
       tick();
     } catch (error) {
-      placeholder.textContent = "Camera permission was blocked or the QR scanner could not start. Type the Guest ID below.";
+      stopCamera(
+        error && (error.name === "NotAllowedError" || error.name === "SecurityError")
+          ? "Camera permission was blocked. Allow camera access in your browser settings, then tap Turn camera on."
+          : "The camera or QR scanner could not start. Tap Turn camera on to retry, or type the Guest ID below.",
+      );
     }
   }
 
@@ -231,6 +365,13 @@
 
   lookupButton.addEventListener("click", () => lookupGuest(manualId.value));
   confirmButton.addEventListener("click", confirmPunch);
+  cameraToggle.addEventListener("click", () => {
+    if (stream || cameraStarting) {
+      stopCamera();
+    } else {
+      startCamera();
+    }
+  });
   manualId.addEventListener("keydown", (event) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -239,10 +380,7 @@
   });
 
   window.addEventListener("pagehide", () => {
-    scanning = false;
-    if (stream) {
-      stream.getTracks().forEach((track) => track.stop());
-    }
+    stopCamera();
   });
 
   renderStation();

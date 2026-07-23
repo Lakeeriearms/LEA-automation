@@ -20,9 +20,10 @@
           <strong id="stationChecklist"></strong>
         </article>
         <section class="panel">
-          <div class="reader"><video id="readerVideo" class="hide" autoplay muted playsinline></video><p class="reader-placeholder" id="readerPlaceholder">Starting camera...</p></div>
+          <div class="reader" id="reader"><video id="readerVideo" class="hide" autoplay muted playsinline></video><p class="reader-placeholder" id="readerPlaceholder">Starting camera...</p><div class="scan-feedback hide" id="scanFeedback" role="status" aria-live="assertive"><strong>QR scanned</strong><span id="scanFeedbackId"></span></div></div>
           <div class="form">
-            <div class="field"><label for="manualGuestId">Guest ID backup</label><input id="manualGuestId" placeholder="LEA-260707-ABC123"></div>
+            <button class="btn secondary camera-toggle" id="cameraToggle" type="button" aria-pressed="false" disabled>Starting camera...</button>
+            <div class="field"><label for="manualGuestId">Guest ID</label><input id="manualGuestId" placeholder="LEA-260707-ABC123"></div>
             <button class="btn secondary" id="lookupButton" type="button">Look up guest</button>
             <div class="scan-result hide" id="scanResult"><strong id="resultName"></strong><span class="guest-id" id="resultGuestId"></span><span id="resultDetail"></span></div>
             <div class="field hide" id="purchaseField"><label for="purchaseAmount">Purchase amount</label><input id="purchaseAmount" type="number" min="0" step="0.01" inputmode="decimal"></div>
