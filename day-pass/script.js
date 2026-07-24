@@ -1,5 +1,5 @@
 const CONFIG = {
-  submissionEndpoint: "https://script.google.com/macros/s/AKfycbwf3r8E_qzQvNmMKfw2FTaaEc_ixx1F8vIv5sJaF5WB73GiRyR5n2KSnyYw1zsIXjy_Vw/exec",
+  submissionEndpoint: "https://script.google.com/macros/s/AKfycbxzD-I7SxsGzUz4J6D7CAsipNjOr9inxwK5qX9fCrwNeu5dCxRbnYnth_rZ0fBQkiCBXw/exec",
   businessName: "Lake Erie Arms",
   membershipUrl: "https://www.learms.net/memberships",
   maxPassesPerPhonePerYear: 2,
